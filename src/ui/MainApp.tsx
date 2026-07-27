@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { exportCaseToJson, suggestBackupFilename } from '../data/backup';
 import { downloadText } from './download';
-import { useTotals } from './useCalc';
+import { useGrandTotalAll } from './useCalc';
 import { money } from './format';
 import { OverviewTab } from './tabs/OverviewTab';
 import { SystemDetailTab } from './tabs/SystemDetailTab';
@@ -16,7 +16,7 @@ import { ParamsTab } from './tabs/ParamsTab';
 type TabKey = 'overview' | 'detail' | 'check' | 'info' | 'material' | 'rate' | 'params';
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'overview', label: '消防總表' },
+  { key: 'overview', label: '工程總表' },
   { key: 'detail', label: '系統明細' },
   { key: 'check', label: '合理性檢核' },
   { key: 'info', label: '案件資訊' },
@@ -27,7 +27,7 @@ const TABS: { key: TabKey; label: string }[] = [
 
 export function MainApp() {
   const { current, saveCurrent, closeCase } = useAppStore();
-  const totals = useTotals();
+  const grand = useGrandTotalAll();
   const [tab, setTab] = useState<TabKey>('overview');
   const [jumpSys, setJumpSys] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -56,7 +56,7 @@ export function MainApp() {
         <div>
           <strong>{current.name}</strong> <span className="muted mono">#{current.id}</span>
           <div className="metric-label">
-            工程總價 <span className="mono">NT$ {money(totals?.grandSubtotal ?? 0)}</span>
+            工程總價（全案） <span className="mono">NT$ {money(grand?.grandSubtotal ?? 0)}</span>
           </div>
         </div>
         <div className="spacer" />

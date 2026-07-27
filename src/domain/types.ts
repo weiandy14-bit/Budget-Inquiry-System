@@ -67,15 +67,17 @@ export interface DerivedRule {
 
 /** 子系統定義（火警/廣播/泡沫…） */
 export interface SubSystemDef {
-  no: string; // 序號（可為 "8+"）
-  name: string; // 名稱，例：火警系統
-  key: string; // 系統鍵，例：fire
+  no: string; // 序號
+  name: string; // 名稱，例：火警設備工程
+  key: string; // 系統鍵（全案唯一），例：fire
   status: string; // 狀態：工率齊全 / 待建 …
+  bigKey: string; // 所屬大系統鍵，例：fire-protection
 }
 
-/** 大系統定義（消防系統，未來電力/弱電以相同結構複製） */
+/** 大系統定義（工程大類：電氣/電信弱電/給排水/消防/空調） */
 export interface BigSystemDef {
-  name: string; // 大系統名稱，例：消防系統
+  key: string; // 大系統鍵，例：fire-protection
+  name: string; // 大系統名稱，例：消防系統工程
   subsystems: SubSystemDef[];
 }
 
@@ -92,7 +94,7 @@ export interface MasterData {
   workItems: WorkItem[];
   quantityRules: QuantityRule[];
   derivedRules: DerivedRule[];
-  bigSystem: BigSystemDef;
+  bigSystems: BigSystemDef[];
   defaults: SeedDefaults;
 }
 

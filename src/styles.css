@@ -141,6 +141,35 @@ select.input-cell {
   border-color: #1c4faf;
 }
 
+/* 大系統（工程大類）導覽列：文字列 + 選中者藍框強調 */
+.big-switch {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+}
+.big-switch .tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #333;
+}
+.big-switch .tab:hover {
+  background: #eef1f5;
+}
+.big-switch .tab.active {
+  border: 2px solid #2b7fff;
+  background: #eaf2ff;
+  color: #1c4faf;
+  font-weight: 700;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;

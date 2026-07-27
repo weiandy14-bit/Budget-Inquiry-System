@@ -17,21 +17,74 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
   const subs = useSubsystems();
   const master = useAppStore((s) => s.master);
   const current = useAppStore((s) => s.current);
-  const { addLine, updateLine, removeLine } = useAppStore();
+  const bigKey = useAppStore((s) => s.bigKey);
+  const setBigKey = useAppStore((s) => s.setBigKey);
+  const { addLine, updateLine, removeLine, addCustomSystem } = useAppStore();
 
-  const [sysKey, setSysKey] = useState(initialSys ?? subs[0]?.key ?? 'fire');
+  const [sysKey, setSysKey] = useState(initialSys ?? subs[0]?.key ?? '');
+  const [newSysName, setNewSysName] = useState('');
   useEffect(() => {
     if (initialSys) setSysKey(initialSys);
   }, [initialSys]);
 
+  // 切換大系統時，若目前子系統不屬於此大系統，改選該大系統第一個子系統。
+  useEffect(() => {
+    if (subs.length && !subs.some((s) => s.key === sysKey)) setSysKey(subs[0].key);
+  }, [subs, sysKey]);
+
   const result = useSystemResult(sysKey);
   const codes = useMemo(() => master?.workItems ?? [], [master]);
 
-  if (!current || !master || !result) return null;
+  if (!current || !master) return null;
   const sysTier: Tier = current.tiers[sysKey] ?? '普通';
+
+  const bigNav = (
+    <div className="big-switch">
+      {master.bigSystems.map((b) => (
+        <div
+          key={b.key}
+          className={`tab ${bigKey === b.key ? 'active' : ''}`}
+          onClick={() => setBigKey(b.key)}
+        >
+          {b.name}
+        </div>
+      ))}
+    </div>
+  );
+
+  // 空的大系統（尚無子系統）：提示並提供新增。
+  if (subs.length === 0 || !result) {
+    return (
+      <div>
+        {bigNav}
+        <div className="card">
+          <p className="muted">此大系統尚無子系統。新增一個開始編製：</p>
+          <div className="row">
+            <input
+              placeholder="子系統名稱（例：高壓受電設備工程）"
+              value={newSysName}
+              onChange={(e) => setNewSysName(e.target.value)}
+            />
+            <button
+              className="primary"
+              onClick={() => {
+                if (newSysName.trim()) {
+                  addCustomSystem(newSysName.trim());
+                  setNewSysName('');
+                }
+              }}
+            >
+              新增子系統
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
+      {bigNav}
       <div className="sys-switch">
         {subs.map((s) => (
           <div

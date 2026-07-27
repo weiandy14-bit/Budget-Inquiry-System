@@ -12,7 +12,7 @@ import { create } from 'zustand';
 import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier } from '../domain/types';
 import { getRepositories } from '../data';
 import { buildFireSampleCase } from '../domain/seed';
-import { nextCustomKey } from '../domain/systems';
+import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
 
 let lineSeq = 0;
 function newLineId(): string {
@@ -30,8 +30,11 @@ interface AppState {
   current: Case | null;
   loading: boolean;
   error: string | null;
+  /** 目前選中的大系統鍵（UI 狀態，系統明細/總表共用）。 */
+  bigKey: string;
 
   init: () => Promise<void>;
+  setBigKey: (bigKey: string) => void;
   refreshList: () => Promise<void>;
   openCase: (id: string) => Promise<void>;
   saveCurrent: () => Promise<void>;
@@ -67,6 +70,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   current: null,
   loading: false,
   error: null,
+  bigKey: FIRE_BIG_KEY,
+
+  setBigKey(bigKey) {
+    set({ bigKey });
+  },
 
   async init() {
     set({ loading: true, error: null });
@@ -214,12 +222,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     const master = get().master;
     const cur = get().current;
     if (!master || !cur) return;
-    const key = nextCustomKey(master.bigSystem, cur);
+    const bigKey = get().bigKey;
+    const key = nextCustomKey(master, cur);
     const def: SubSystemDef = {
-      no: String(master.bigSystem.subsystems.length + cur.customSystems.length),
+      no: String(cur.customSystems.filter((s) => s.bigKey === bigKey).length + 1),
       name,
       key,
       status: '使用者自訂',
+      bigKey,
     };
     mutate(set, (c) => ({
       ...c,
