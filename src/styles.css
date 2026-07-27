@@ -1,0 +1,48 @@
+:root {
+  font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  color: #1a1a1a;
+  background: #f5f6f8;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+.app-shell {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.metric {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0a5;
+}
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: #667;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th,
+td {
+  border: 1px solid #e2e5ea;
+  padding: 6px 10px;
+  text-align: right;
+}
+th:first-child,
+td:first-child {
+  text-align: left;
+}
