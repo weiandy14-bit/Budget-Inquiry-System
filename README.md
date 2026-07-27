@@ -28,7 +28,13 @@ npm run dev        # 開發伺服器
 npm test           # 執行單元測試（含火警範例案驗收）
 npm run build      # 產出 dist/ 靜態檔
 npm run preview    # 預覽 build 結果
+
+# 端對端測試（瀏覽器流程）
+npx playwright install chromium   # 首次需下載瀏覽器
+npm run test:e2e                  # 自動起 dev server 並跑 e2e/app.spec.ts
 ```
+
+> e2e 涵蓋「載入範例案 → 日工價=3000 → 驗證工資 2,286,786」與「大系統兩層導覽」兩個使用者流程。
 
 `npm run build` 後的 `dist/` 為純靜態檔（vite base 設為相對路徑），可用任何本機 server
 開啟；打包已為單機部署最佳化。
