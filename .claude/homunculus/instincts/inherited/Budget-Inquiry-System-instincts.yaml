@@ -1,0 +1,363 @@
+# Instincts generated from https://github.com/weiandy14-bit/Budget-Inquiry-System
+# Generated: 2026-07-27T09:23:43.166Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: Budget-Inquiry-System-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Commit Length
+
+## Action
+
+Keep commit messages concise (~24 characters)
+
+## Evidence
+
+- Average commit message length: 24 chars
+- Based on 2 commits
+
+---
+id: Budget-Inquiry-System-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: Budget-Inquiry-System-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: Budget-Inquiry-System-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: Budget-Inquiry-System-test-colocate
+trigger: "when writing tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Test Colocate
+
+## Action
+
+Place test file next to the source file (e.g., Button.test.tsx next to Button.tsx)
+
+## Evidence
+
+- Colocated test pattern detected
+- Tests live alongside source files
+
+---
+id: Budget-Inquiry-System-workflow-add-or-refactor-domain-model
+trigger: "when doing add or refactor domain model"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Workflow Add Or Refactor Domain Model
+
+## Action
+
+Follow the add-or-refactor-domain-model workflow:
+1. Create or modify domain model file(s) (e.g., domain/bigSystems.ts, domain/systems.ts)
+2. Update type definitions (domain/types.ts)
+3. Update seed data (domain/seed.ts)
+4. Update store logic/state (store/useAppStore.ts)
+5. Update UI components and logic to use new/refactored model (ui/tabs/*, ui/MainApp.tsx, ui/useCalc.ts)
+6. Update or add tests if business logic is affected (engine/checks.test.ts)
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: src/domain/bigSystems.ts, src/domain/systems.ts, src/domain/types.ts
+
+---
+id: budget-inquiry-system-instinct-file-naming
+trigger: "When creating or renaming a file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct File Naming
+
+## Action
+
+Use PascalCase for file names (e.g., MainApp.tsx, OverviewTab.tsx)
+
+## Evidence
+
+- Pattern in files: src/ui/MainApp.tsx, src/ui/tabs/OverviewTab.tsx
+
+---
+id: budget-inquiry-system-instinct-function-naming
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Function Naming
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.functions
+
+---
+id: budget-inquiry-system-instinct-class-naming
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Class Naming
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.classes
+
+---
+id: budget-inquiry-system-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.constants
+
+---
+id: budget-inquiry-system-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in codeStyle.importStyle
+
+---
+id: budget-inquiry-system-instinct-export-style
+trigger: "When exporting modules or functions"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in codeStyle.exportStyle
+
+---
+id: budget-inquiry-system-instinct-testing-colocated
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Testing Colocated
+
+## Action
+
+Place test files next to the code they test (colocated)
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: colocated
+
+---
+id: budget-inquiry-system-instinct-testing-business-logic
+trigger: "When business logic is changed or added"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Testing Business Logic
+
+## Action
+
+Update or add tests in engine/checks.test.ts
+
+## Evidence
+
+- Workflow: add-or-refactor-domain-model includes engine/checks.test.ts
+
+---
+id: budget-inquiry-system-instinct-testing-pattern
+trigger: "When writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Testing Pattern
+
+## Action
+
+Test core business logic in engine/checks.test.ts, not in UI files
+
+## Evidence
+
+- engine/checks.test.ts is the main test file in workflow
+
+---
+id: budget-inquiry-system-instinct-git-commit-format-freeform
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Git Commit Format Freeform
+
+## Action
+
+Use freeform commit messages without a strict prefix, typically describing the change in natural language
+
+## Evidence
+
+- Pattern in commits: type=freeform, no prefixes
+- Examples: '建置畫面（規格 §5）：案件閘門與主應用 7 分頁'
+
+---
+id: budget-inquiry-system-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Git Commit Length
+
+## Action
+
+Keep commit messages concise, around 24 characters on average
+
+## Evidence
+
+- Pattern in commits: averageLength=24
+
+---
+id: budget-inquiry-system-instinct-workflow-add-or-refactor-domain-model
+trigger: "When introducing a new domain concept or refactoring an existing one"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Workflow Add Or Refactor Domain Model
+
+## Action
+
+Follow the sequence: update/create domain model file(s), update types, seed data, store logic, propagate to UI, update/add tests
+
+## Evidence
+
+- Workflow: add-or-refactor-domain-model
+- Files: src/domain/bigSystems.ts, src/domain/systems.ts, src/domain/types.ts, src/domain/seed.ts, src/store/useAppStore.ts, src/ui/MainApp.tsx, src/ui/tabs/OverviewTab.tsx, src/ui/tabs/SystemDetailTab.tsx, src/ui/useCalc.ts, src/engine/checks.test.ts
+
