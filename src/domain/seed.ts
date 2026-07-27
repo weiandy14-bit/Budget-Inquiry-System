@@ -170,5 +170,6 @@ export function buildFireSampleCase(master: MasterData): Case {
     derived,
     matOverride: {},
     systems: { fire: lines },
+    customSystems: [],
   };
 }

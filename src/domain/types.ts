@@ -144,6 +144,8 @@ export interface Case {
   matOverride: Record<string, number>;
   /** 各系統的明細列 { sysKey: LineItem[] } */
   systems: Record<string, LineItem[]>;
+  /** 使用者於本案新增的子系統（§6.2）；空陣列＝僅用主檔預設子系統。 */
+  customSystems: SubSystemDef[];
 }
 
 /** 案件清單摘要（閘門畫面用，避免載入整包 systems） */
