@@ -59,7 +59,7 @@ export interface QuantityRule {
 
 /** 衍生費用規則（DerivedRule）— seed_data.json「衍生費用規則」 */
 export interface DerivedRule {
-  /** 名稱（PK），例：配管另件 */
+  /** 名稱（PK），例：配管另件含接線盒(戶外採不鏽鋼) */
   name: string;
   /** 基數群組（設備|管材|電線|實體） */
   base: BaseGroup;
