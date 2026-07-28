@@ -14,6 +14,8 @@ import { getRepositories } from '../data';
 import { buildFireSampleCase } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
 import { buildCustomWorkItem, findWorkItemByName, nextCustomCode } from '../domain/workItems';
+import { indexMaster } from '../engine/calc';
+import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
 
 let lineSeq = 0;
 function newLineId(): string {
@@ -48,6 +50,8 @@ interface AppState {
   refreshList: () => Promise<void>;
   openCase: (id: string) => Promise<void>;
   saveCurrent: () => Promise<void>;
+  /** 儲存並回傳「與上次存檔比對」的變更報告（供儲存時彈出報告視窗）。 */
+  saveCurrentWithReport: () => Promise<ChangeReport | null>;
   createCase: (id: string, name: string) => Promise<void>;
   importCase: (c: Case) => Promise<void>;
   deleteCase: (id: string) => Promise<void>;
@@ -138,6 +142,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     await cases.save(toSave);
     set({ current: toSave });
     await get().refreshList();
+  },
+
+  async saveCurrentWithReport() {
+    const cur = get().current;
+    const master = get().master;
+    if (!cur || !master) return null;
+    const { cases } = getRepositories();
+    const old = await cases.get(cur.id); // 上次存檔版本（比對基準）
+    const report = buildChangeReport(old, cur, indexMaster(master), master);
+    const toSave: Case = { ...cur, updated: new Date().toISOString() };
+    await cases.save(toSave);
+    set({ current: toSave });
+    await get().refreshList();
+    return report;
   },
 
   async createCase(id, name) {

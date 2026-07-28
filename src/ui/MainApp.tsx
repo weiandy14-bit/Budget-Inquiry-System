@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { exportCaseToJson, suggestBackupFilename } from '../data/backup';
 import { downloadText } from './download';
+import { ChangeReportModal } from './ChangeReportModal';
+import type { ChangeReport } from '../domain/changeReport';
 import { useGrandTotalAll } from './useCalc';
 import { money } from './format';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -28,11 +30,12 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 export function MainApp() {
-  const { current, saveCurrent, closeCase } = useAppStore();
+  const { current, saveCurrentWithReport, closeCase } = useAppStore();
   const grand = useGrandTotalAll();
   const [tab, setTab] = useState<TabKey>('overview');
   const [jumpSys, setJumpSys] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [report, setReport] = useState<ChangeReport | null>(null);
 
   if (!current) return null;
 
@@ -42,9 +45,10 @@ export function MainApp() {
   }
 
   async function handleSave() {
-    await saveCurrent();
+    const rep = await saveCurrentWithReport();
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
+    if (rep) setReport(rep); // 儲存後彈出變更報告
   }
 
   function gotoSystem(sysKey: string) {
@@ -89,6 +93,8 @@ export function MainApp() {
       {tab === 'material' && <MaterialMasterTab />}
       {tab === 'rate' && <RateMasterTab />}
       {tab === 'params' && <ParamsTab />}
+
+      {report && <ChangeReportModal report={report} onClose={() => setReport(null)} />}
     </div>
   );
 }
