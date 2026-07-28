@@ -244,3 +244,49 @@ tfoot td {
   cursor: pointer;
   text-decoration: underline;
 }
+
+/* 整合標單 */
+.print-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  margin: 4px 0 12px;
+}
+.sheet-section h3 {
+  margin: 0 0 8px;
+}
+.sheet-table tr.sheet-derived {
+  background: #f6f8fc;
+  font-style: italic;
+}
+
+/* 列印：只出標單區，隱藏頂端列/分頁/導覽/操作鈕 */
+@media print {
+  body {
+    background: #fff;
+  }
+  .topbar,
+  .tabs,
+  .no-print {
+    display: none !important;
+  }
+  .app-shell {
+    padding: 0;
+  }
+  .card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0 0 10px;
+  }
+  .table-scroll {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  .sheet-table {
+    font-size: 11px;
+  }
+  .sheet-table tr.sheet-derived {
+    background: #fff;
+  }
+}

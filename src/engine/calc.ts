@@ -84,6 +84,7 @@ export interface RowResult {
   laborUnit: number; // 工資單價 = rate × 日工價
   unit_: number; // 單價
   total: number; // 複價 = qty × 單價
+  note: string; // 本案備註（line.note）
   valid: boolean;
 }
 
@@ -122,6 +123,7 @@ export function calcRow(
       laborUnit: 0,
       unit_: 0,
       total: 0,
+      note: line.note ?? '',
       valid: false,
     };
   }
@@ -161,6 +163,7 @@ export function calcRow(
     laborUnit,
     unit_,
     total,
+    note: line.note ?? '',
     valid: true,
   };
 }

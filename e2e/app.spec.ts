@@ -24,6 +24,17 @@ test('載入火警範例案，日工價=3000 時工資還原至驗收基準 2,28
   await expect(page.getByText('2,286,786').first()).toBeVisible();
 });
 
+test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '整合標單' }).click();
+
+  await expect(page.getByRole('button', { name: /列印/ })).toBeVisible();
+  // 標單含實體工項與殿後的工資列
+  await expect(page.getByText('火警綜合盤').first()).toBeVisible();
+  await expect(page.getByText('工資').first()).toBeVisible();
+  await expect(page.getByText('配管另件含接線盒(戶外採不鏽鋼)').first()).toBeVisible();
+});
+
 test('大系統兩層導覽：消防 9 項子系統 + 其他大系統為空白占位', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();

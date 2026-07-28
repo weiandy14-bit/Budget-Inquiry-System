@@ -60,6 +60,8 @@ interface AppState {
   setDerivedRatio: (name: string, ratio: number) => void;
   setMatOverride: (code: string, price: number | null) => void;
   addLine: (sysKey: string, code?: string) => void;
+  /** 在指定列之後插入一列空白明細（afterLineId 查無則附加於末尾）。 */
+  insertLineAfter: (sysKey: string, afterLineId: string, code?: string) => void;
   updateLine: (sysKey: string, lineId: string, patch: Partial<LineItem>) => void;
   removeLine: (sysKey: string, lineId: string) => void;
   addCustomSystem: (name: string) => void;
@@ -224,6 +226,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     mutate(set, (c) => {
       const list = c.systems[sysKey] ?? [];
       return { ...c, systems: { ...c.systems, [sysKey]: [...list, emptyLine(code)] } };
+    });
+  },
+
+  insertLineAfter(sysKey, afterLineId, code = '') {
+    mutate(set, (c) => {
+      const list = c.systems[sysKey] ?? [];
+      const idx = list.findIndex((l) => l.id === afterLineId);
+      const at = idx < 0 ? list.length : idx + 1;
+      const next = [...list.slice(0, at), emptyLine(code), ...list.slice(at)];
+      return { ...c, systems: { ...c.systems, [sysKey]: next } };
     });
   },
 
