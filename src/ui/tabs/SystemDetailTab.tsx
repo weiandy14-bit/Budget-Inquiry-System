@@ -19,7 +19,8 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
   const current = useAppStore((s) => s.current);
   const bigKey = useAppStore((s) => s.bigKey);
   const setBigKey = useAppStore((s) => s.setBigKey);
-  const { addLine, updateLine, removeLine, addCustomSystem, assignLineByName } = useAppStore();
+  const { addLine, insertLineAfter, updateLine, removeLine, addCustomSystem, assignLineByName } =
+    useAppStore();
 
   const [sysKey, setSysKey] = useState(initialSys ?? subs[0]?.key ?? '');
   const [newSysName, setNewSysName] = useState('');
@@ -254,8 +255,18 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                     </td>
                     <td className="mono">{money(r.unit_)}</td>
                     <td className="mono">{money(r.total)}</td>
-                    <td>
-                      <button className="danger" onClick={() => removeLine(sysKey, r.lineId)}>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <button
+                        title="於此列下方插入一列"
+                        onClick={() => insertLineAfter(sysKey, r.lineId)}
+                      >
+                        ＋
+                      </button>{' '}
+                      <button
+                        className="danger"
+                        title="刪除此列"
+                        onClick={() => removeLine(sysKey, r.lineId)}
+                      >
                         ×
                       </button>
                     </td>

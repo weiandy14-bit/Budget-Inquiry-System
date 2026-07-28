@@ -7,17 +7,19 @@ import { useGrandTotalAll } from './useCalc';
 import { money } from './format';
 import { OverviewTab } from './tabs/OverviewTab';
 import { SystemDetailTab } from './tabs/SystemDetailTab';
+import { PrintSheetTab } from './tabs/PrintSheetTab';
 import { CheckTab } from './tabs/CheckTab';
 import { CaseInfoTab } from './tabs/CaseInfoTab';
 import { MaterialMasterTab } from './tabs/MaterialMasterTab';
 import { RateMasterTab } from './tabs/RateMasterTab';
 import { ParamsTab } from './tabs/ParamsTab';
 
-type TabKey = 'overview' | 'detail' | 'check' | 'info' | 'material' | 'rate' | 'params';
+type TabKey = 'overview' | 'detail' | 'print' | 'check' | 'info' | 'material' | 'rate' | 'params';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'overview', label: '工程總表' },
   { key: 'detail', label: '系統明細' },
+  { key: 'print', label: '整合標單' },
   { key: 'check', label: '合理性檢核' },
   { key: 'info', label: '案件資訊' },
   { key: 'material', label: '材料主檔' },
@@ -81,6 +83,7 @@ export function MainApp() {
 
       {tab === 'overview' && <OverviewTab onGotoSystem={gotoSystem} />}
       {tab === 'detail' && <SystemDetailTab initialSys={jumpSys} />}
+      {tab === 'print' && <PrintSheetTab />}
       {tab === 'check' && <CheckTab />}
       {tab === 'info' && <CaseInfoTab />}
       {tab === 'material' && <MaterialMasterTab />}
