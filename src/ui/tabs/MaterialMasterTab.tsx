@@ -8,6 +8,7 @@ export function MaterialMasterTab() {
   const master = useAppStore((s) => s.master);
   const current = useAppStore((s) => s.current);
   const setMatOverride = useAppStore((s) => s.setMatOverride);
+  const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const [q, setQ] = useState('');
 
   const items = useMemo(() => {
@@ -53,7 +54,22 @@ export function MaterialMasterTab() {
                 <td className="l muted">{w.spec}</td>
                 <td>{w.unit}</td>
                 <td style={{ background: groupColor(w.grp) }}>{w.grp}</td>
-                <td className="mono muted">{w.refPrice ? money(w.refPrice) : '—'}</td>
+                <td>
+                  {w.custom ? (
+                    <input
+                      className="input-cell mono"
+                      type="number"
+                      style={{ width: 100 }}
+                      placeholder="全域參考價"
+                      value={w.refPrice || ''}
+                      onChange={(e) =>
+                        updateWorkItem(w.code, { refPrice: e.target.value === '' ? 0 : Number(e.target.value) })
+                      }
+                    />
+                  ) : (
+                    <span className="mono muted">{w.refPrice ? money(w.refPrice) : '—'}</span>
+                  )}
+                </td>
                 <td>
                   <input
                     className="input-cell mono"

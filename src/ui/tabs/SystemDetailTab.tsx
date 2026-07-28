@@ -19,7 +19,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
   const current = useAppStore((s) => s.current);
   const bigKey = useAppStore((s) => s.bigKey);
   const setBigKey = useAppStore((s) => s.setBigKey);
-  const { addLine, updateLine, removeLine, addCustomSystem } = useAppStore();
+  const { addLine, updateLine, removeLine, addCustomSystem, assignLineByName } = useAppStore();
 
   const [sysKey, setSysKey] = useState(initialSys ?? subs[0]?.key ?? '');
   const [newSysName, setNewSysName] = useState('');
@@ -34,6 +34,10 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
 
   const result = useSystemResult(sysKey);
   const codes = useMemo(() => master?.workItems ?? [], [master]);
+  const names = useMemo(
+    () => Array.from(new Set((master?.workItems ?? []).map((w) => w.name))),
+    [master],
+  );
 
   if (!current || !master) return null;
   const sysTier: Tier = current.tiers[sysKey] ?? '普通';
@@ -113,6 +117,11 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
             </option>
           ))}
         </datalist>
+        <datalist id="name-list">
+          {names.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
 
         <div className="table-scroll">
           <table>
@@ -153,7 +162,27 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                       />
                     </td>
                     <td className="l" style={{ background: groupColor(r.grp) }}>
-                      {r.valid ? r.name : <span className="warn">查無此碼</span>}
+                      <input
+                        className="input-cell"
+                        list="name-list"
+                        style={{ width: 190 }}
+                        placeholder="輸入名稱，查無自動建碼"
+                        key={`nm-${r.lineId}-${line.code}`}
+                        defaultValue={r.valid ? r.name : ''}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                        }}
+                        onBlur={(e) => {
+                          const text = e.target.value.trim();
+                          if (!text || (r.valid && text === r.name)) return;
+                          assignLineByName(sysKey, r.lineId, text);
+                        }}
+                      />
+                      {!r.valid && line.code && (
+                        <span className="warn" title="查無此工項碼">
+                          {' '}查無碼 {line.code}
+                        </span>
+                      )}
                     </td>
                     <td className="l">
                       <input
