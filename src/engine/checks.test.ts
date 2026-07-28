@@ -39,7 +39,7 @@ describe('findSamePriceConflicts', () => {
     // 於火警系統把某列設本案單價 100；另建一個系統放同碼但單價 200。
     c.systems.fire[0] = { ...c.systems.fire[0], matPrice: 100 };
     c.systems.broadcast = [
-      { id: 'b1', code: c.systems.fire[0].code, qty: 1, workQty: null, tierManual: '', matPrice: 200, disc: null, note: '' },
+      { id: 'b1', code: c.systems.fire[0].code, spec: '', qty: 1, workQty: null, tierManual: '', matPrice: 200, disc: null, note: '' },
     ];
     const warns = findSamePriceConflicts(c);
     expect(warns).toHaveLength(1);
@@ -52,5 +52,23 @@ describe('findSamePriceConflicts', () => {
     c.systems.fire[0] = { ...c.systems.fire[0], matPrice: 100 };
     c.systems.fire[1] = { ...c.systems.fire[1], code: c.systems.fire[0].code, matPrice: 100 };
     expect(findSamePriceConflicts(c)).toHaveLength(0);
+  });
+
+  it('同碼但本案規格不同視為不同品項，不算衝突（受信總機不同點數）', () => {
+    const c = buildFireSampleCase(master);
+    const code = c.systems.fire[0].code;
+    c.systems.fire[0] = { ...c.systems.fire[0], matPrice: 100, spec: '點數不低於1000點' };
+    c.systems.fire[1] = { ...c.systems.fire[1], code, matPrice: 200, spec: '點數不低於2500點' };
+    expect(findSamePriceConflicts(c)).toHaveLength(0);
+  });
+
+  it('同碼同規格不同價仍為衝突', () => {
+    const c = buildFireSampleCase(master);
+    const code = c.systems.fire[0].code;
+    c.systems.fire[0] = { ...c.systems.fire[0], matPrice: 100, spec: '點數不低於2500點' };
+    c.systems.fire[1] = { ...c.systems.fire[1], code, matPrice: 200, spec: '點數不低於2500點' };
+    const warns = findSamePriceConflicts(c);
+    expect(warns).toHaveLength(1);
+    expect(warns[0].code).toBe(code);
   });
 });

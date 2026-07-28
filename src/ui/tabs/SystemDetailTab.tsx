@@ -121,6 +121,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                 <th>#</th>
                 <th className="l">工項碼</th>
                 <th className="l">名稱</th>
+                <th className="l">規格</th>
                 <th>單位</th>
                 <th>群組</th>
                 <th>數量</th>
@@ -153,6 +154,15 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                     </td>
                     <td className="l" style={{ background: groupColor(r.grp) }}>
                       {r.valid ? r.name : <span className="warn">查無此碼</span>}
+                    </td>
+                    <td className="l">
+                      <input
+                        className="input-cell"
+                        style={{ width: 150 }}
+                        placeholder={r.item && r.item.spec !== '—' ? r.item.spec : '本案規格'}
+                        value={line.spec ?? ''}
+                        onChange={(e) => updateLine(sysKey, r.lineId, { spec: e.target.value })}
+                      />
                     </td>
                     <td>{r.unit}</td>
                     <td style={{ background: groupColor(r.grp) }}>{r.grp}</td>
@@ -225,7 +235,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
               })}
               {result.rows.length === 0 && (
                 <tr>
-                  <td colSpan={15} className="l muted">
+                  <td colSpan={16} className="l muted">
                     尚無明細，點「新增明細列」開始。
                   </td>
                 </tr>
@@ -233,7 +243,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan={13} className="l">
+                <td colSpan={14} className="l">
                   實體小計
                 </td>
                 <td className="mono">{money(result.phys)}</td>
@@ -241,7 +251,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
               </tr>
               {result.derived.map((d) => (
                 <tr key={d.name}>
-                  <td colSpan={13} className="l">
+                  <td colSpan={14} className="l">
                     {d.name}
                     <span className="muted">
                       {'　'}（{d.base}群組 {money(d.baseAmount)} × {(d.ratio * 100).toFixed(1)}%）
@@ -252,7 +262,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                 </tr>
               ))}
               <tr>
-                <td colSpan={13} className="l">
+                <td colSpan={14} className="l">
                   工資（統包）
                   <span className="muted">
                     {'　'}
@@ -263,7 +273,7 @@ export function SystemDetailTab({ initialSys }: { initialSys: string | null }) {
                 <td></td>
               </tr>
               <tr>
-                <td colSpan={13} className="l">
+                <td colSpan={14} className="l">
                   系統小計
                 </td>
                 <td className="mono">{money(result.systemSubtotal)}</td>

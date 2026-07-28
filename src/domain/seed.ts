@@ -127,6 +127,7 @@ export function buildFireSampleCase(master: MasterData): Case {
   const lines: LineItem[] = raw.火警範例案.map((r, i) => ({
     id: `fire-${i + 1}`,
     code: r.工項碼,
+    spec: '',
     qty: r.數量,
     workQty: null,
     tierManual: '',

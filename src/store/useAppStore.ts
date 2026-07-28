@@ -21,7 +21,16 @@ function newLineId(): string {
 }
 
 function emptyLine(code = ''): LineItem {
-  return { id: newLineId(), code, qty: 0, workQty: null, tierManual: '', matPrice: null, disc: null, note: '' };
+  return { id: newLineId(), code, spec: '', qty: 0, workQty: null, tierManual: '', matPrice: null, disc: null, note: '' };
+}
+
+/** 回填舊案件缺少的後加欄位（例：spec），確保載入後型別完整。 */
+function normalizeCase(c: Case): Case {
+  const systems: Case['systems'] = {};
+  for (const [k, lines] of Object.entries(c.systems)) {
+    systems[k] = lines.map((l) => ({ ...l, spec: l.spec ?? '' }));
+  }
+  return { ...c, systems };
 }
 
 interface AppState {
@@ -102,7 +111,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ error: `找不到案件 ${id}` });
       return;
     }
-    set({ current: c, error: null });
+    set({ current: normalizeCase(c), error: null });
   },
 
   async saveCurrent() {
@@ -144,12 +153,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     // 若編號已存在，附加時間戳避免覆蓋既有案件。
     let id = c.id;
     if (await cases.exists(id)) id = `${c.id}-imported-${Date.now().toString(36)}`;
-    const restored: Case = {
+    const restored: Case = normalizeCase({
       ...c,
       id,
       customSystems: c.customSystems ?? [],
       updated: new Date().toISOString(),
-    };
+    });
     await cases.save(restored);
     await get().refreshList();
     set({ current: restored });

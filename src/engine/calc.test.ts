@@ -67,6 +67,25 @@ describe('calcRow 群組差異', () => {
   });
 });
 
+describe('本案規格覆寫（spec）', () => {
+  const c = buildFireSampleCase(master);
+  const line = c.systems.fire.find((l) => l.code === 'F-01-003')!; // R型受信總機
+
+  it('line.spec 覆寫主檔規格顯示，但不影響任何金額/工數', () => {
+    const base = calcRow(c, 'fire', line, index);
+    const r = calcRow(c, 'fire', { ...line, spec: '點數不低於2500點' }, index);
+    expect(r.spec).toBe('點數不低於2500點');
+    expect(r.total).toBeCloseTo(base.total, 9);
+    expect(r.workDays).toBeCloseTo(base.workDays, 9);
+    expect(r.unit_).toBeCloseTo(base.unit_, 9);
+  });
+
+  it('spec 為空時沿用主檔規格', () => {
+    const r = calcRow(c, 'fire', { ...line, spec: '' }, index);
+    expect(r.spec).toBe(index.itemsByCode.get('F-01-003')!.spec);
+  });
+});
+
 describe('★ 火警範例案驗證基準（wage=3000）', () => {
   const c = buildFireSampleCase(master);
   c.wage = 3000; // 舊制日工價，用以還原真實預算書
