@@ -40,6 +40,12 @@ export interface WorkItem {
   rule: string;
   /** 參考材料單價（訪價基準，起手用；0 代表尚無參考價） */
   refPrice: number;
+  /**
+   * 是否為使用者新增的自訂工項（非 seed 種子）。
+   * true = 使用者在明細表打名稱時「查無 → 自動建碼」產生，持久化於 IndexedDB、跨案共用、可編輯/刪除；
+   * undefined/false = 來自 seed_data.json 的種子工項，唯讀。
+   */
+  custom?: boolean;
 }
 
 /** 數量修正規則（QuantityRule）— seed_data.json「數量修正規則」 */

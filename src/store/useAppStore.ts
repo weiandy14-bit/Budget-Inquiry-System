@@ -9,10 +9,11 @@
  * 供畫面階段擴充。
  */
 import { create } from 'zustand';
-import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier } from '../domain/types';
+import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier, WorkItem } from '../domain/types';
 import { getRepositories } from '../data';
 import { buildFireSampleCase } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
+import { buildCustomWorkItem, findWorkItemByName, nextCustomCode } from '../domain/workItems';
 
 let lineSeq = 0;
 function newLineId(): string {
@@ -63,6 +64,19 @@ interface AppState {
   removeLine: (sysKey: string, lineId: string) => void;
   addCustomSystem: (name: string) => void;
   saveNewVersion: (memo: string) => Promise<void>;
+
+  // ── 全域主檔：使用者自訂工項（跨案共用，持久化於 IndexedDB）──
+  /** 以名稱新增一筆自訂工項（自動配碼），寫入主檔並回傳。 */
+  createWorkItem: (name: string) => Promise<WorkItem>;
+  /** 更新一筆自訂工項欄位（種子工項不可改，會被忽略）。 */
+  updateWorkItem: (code: string, patch: Partial<WorkItem>) => Promise<void>;
+  /** 刪除一筆自訂工項（種子工項不可刪，會被忽略）。 */
+  deleteWorkItem: (code: string) => Promise<void>;
+  /**
+   * 明細表「打名稱→自動建碼」：
+   * 依名稱解析既有工項並設定該列 code；查無則自動新增自訂工項再指派。
+   */
+  assignLineByName: (sysKey: string, lineId: string, name: string) => Promise<void>;
 }
 
 // 以函式更新當前案件並自動記錄 updated 時間。
@@ -263,5 +277,44 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { cases } = getRepositories();
     await cases.save(updated);
     await get().refreshList();
+  },
+
+  async createWorkItem(name) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    if (!master) throw new Error('主檔尚未載入');
+    const code = nextCustomCode(master.workItems);
+    const item = buildCustomWorkItem(code, name);
+    await masters.saveWorkItem(item);
+    set({ master: await masters.load() }); // 重新載入主檔，讓計算索引納入新工項
+    return item;
+  },
+
+  async updateWorkItem(code, patch) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    const item = master?.workItems.find((w) => w.code === code);
+    if (!item || !item.custom) return; // 只允許改自訂工項
+    await masters.saveWorkItem({ ...item, ...patch, code: item.code, custom: true });
+    set({ master: await masters.load() });
+  },
+
+  async deleteWorkItem(code) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    const item = master?.workItems.find((w) => w.code === code);
+    if (!item || !item.custom) return; // 只允許刪自訂工項
+    await masters.deleteWorkItem(code);
+    set({ master: await masters.load() });
+  },
+
+  async assignLineByName(sysKey, lineId, name) {
+    const text = name.trim();
+    if (!text) return;
+    const master = get().master;
+    if (!master) return;
+    let item = findWorkItemByName(master.workItems, text);
+    if (!item) item = await get().createWorkItem(text);
+    get().updateLine(sysKey, lineId, { code: item.code });
   },
 }));

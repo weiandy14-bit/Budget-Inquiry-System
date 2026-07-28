@@ -1,11 +1,17 @@
-/** 工率主檔（規格 §5.6）：全工項三檔工率，可搜尋，唯讀。 */
+/** 工率主檔（規格 §5.6）：全工項三檔工率，可搜尋。種子工項唯讀；使用者自訂工項可編輯/刪除。 */
 import { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { num } from '../format';
+import type { CostGroup } from '../../domain/types';
+
+const GROUPS: CostGroup[] = ['設備', '管材', '電線'];
 
 export function RateMasterTab() {
   const master = useAppStore((s) => s.master);
+  const createWorkItem = useAppStore((s) => s.createWorkItem);
+  const updateWorkItem = useAppStore((s) => s.updateWorkItem);
+  const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
   const [q, setQ] = useState('');
 
   const items = useMemo(() => {
@@ -21,14 +27,22 @@ export function RateMasterTab() {
     );
   }, [master, q]);
 
+  const customCount = useMemo(
+    () => (master?.workItems ?? []).filter((w) => w.custom).length,
+    [master],
+  );
+
   if (!master) return null;
 
   return (
     <div className="card">
-      <h2>工率主檔（唯讀）</h2>
+      <h2>工率主檔</h2>
       <div className="row" style={{ marginBottom: 12 }}>
         <input placeholder="搜尋工項碼 / 名稱 / 規格 / 子系統" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
-        <span className="muted">共 {items.length} 項</span>
+        <span className="muted">共 {items.length} 項（自訂 {customCount}）</span>
+        <button className="primary" onClick={() => createWorkItem('新工項')}>
+          ＋ 新增自訂工項
+        </button>
       </div>
       <div className="table-scroll" style={{ maxHeight: 560, overflowY: 'auto' }}>
         <table>
@@ -43,26 +57,117 @@ export function RateMasterTab() {
               <th>工率·最高</th>
               <th>工率·普通</th>
               <th>工率·最低</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {items.map((w) => (
-              <tr key={w.code}>
-                <td className="l mono">{w.code}</td>
-                <td className="l">{w.name}</td>
-                <td className="l muted">{w.spec}</td>
-                <td>{w.unit}</td>
-                <td style={{ background: groupColor(w.grp) }}>{w.grp}</td>
-                <td className="mono muted">{w.rule}</td>
-                <td className="mono">{num(w.rateHi, 3)}</td>
-                <td className="mono">{num(w.rateMid, 3)}</td>
-                <td className="mono">{num(w.rateLo, 3)}</td>
-              </tr>
-            ))}
+            {items.map((w) =>
+              w.custom ? (
+                <tr key={w.code}>
+                  <td className="l mono">{w.code}</td>
+                  <td className="l">
+                    <input
+                      className="input-cell"
+                      style={{ width: 150 }}
+                      value={w.name}
+                      onChange={(e) => updateWorkItem(w.code, { name: e.target.value })}
+                    />
+                  </td>
+                  <td className="l">
+                    <input
+                      className="input-cell"
+                      style={{ width: 120 }}
+                      placeholder="規格"
+                      value={w.spec}
+                      onChange={(e) => updateWorkItem(w.code, { spec: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="input-cell"
+                      style={{ width: 48 }}
+                      value={w.unit}
+                      onChange={(e) => updateWorkItem(w.code, { unit: e.target.value })}
+                    />
+                  </td>
+                  <td style={{ background: groupColor(w.grp) }}>
+                    <select
+                      className="input-cell"
+                      value={w.grp}
+                      onChange={(e) => updateWorkItem(w.code, { grp: e.target.value as CostGroup })}
+                    >
+                      {GROUPS.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="mono muted">{w.rule}</td>
+                  <td>
+                    <input
+                      className="input-cell mono"
+                      type="number"
+                      step="0.001"
+                      style={{ width: 70 }}
+                      value={w.rateHi}
+                      onChange={(e) => updateWorkItem(w.code, { rateHi: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="input-cell mono"
+                      type="number"
+                      step="0.001"
+                      style={{ width: 70 }}
+                      value={w.rateMid}
+                      onChange={(e) => updateWorkItem(w.code, { rateMid: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="input-cell mono"
+                      type="number"
+                      step="0.001"
+                      style={{ width: 70 }}
+                      value={w.rateLo}
+                      onChange={(e) => updateWorkItem(w.code, { rateLo: Number(e.target.value) })}
+                    />
+                  </td>
+                  <td>
+                    <button
+                      className="danger"
+                      title="刪除此自訂工項"
+                      onClick={() => {
+                        if (confirm(`刪除自訂工項「${w.name}」（${w.code}）？`)) deleteWorkItem(w.code);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={w.code}>
+                  <td className="l mono">{w.code}</td>
+                  <td className="l">{w.name}</td>
+                  <td className="l muted">{w.spec}</td>
+                  <td>{w.unit}</td>
+                  <td style={{ background: groupColor(w.grp) }}>{w.grp}</td>
+                  <td className="mono muted">{w.rule}</td>
+                  <td className="mono">{num(w.rateHi, 3)}</td>
+                  <td className="mono">{num(w.rateMid, 3)}</td>
+                  <td className="mono">{num(w.rateLo, 3)}</td>
+                  <td className="muted" style={{ textAlign: 'center' }}>種子</td>
+                </tr>
+              ),
+            )}
           </tbody>
         </table>
       </div>
-      <p className="muted">工率為施工生產力（工日/單位），幾乎不變，跨案共用。來源：《水電工程估價實務》。</p>
+      <p className="muted">
+        種子工項唯讀（工率來源：《水電工程估價實務》）。自訂工項可直接編輯欄位、按 × 刪除，
+        跨案共用並存於本機。設備類工資不入單價，工率可留 0；管材/電線請補工率以計入單價。
+      </p>
     </div>
   );
 }

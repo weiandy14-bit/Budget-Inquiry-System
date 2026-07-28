@@ -12,7 +12,7 @@
  * 介面全部回傳 Promise，即使單機版是同步的 IndexedDB，
  * 也刻意用非同步簽名，讓日後換成網路 I/O 時簽名不變。
  */
-import type { Case, CaseSummary, MasterData } from '../domain/types';
+import type { Case, CaseSummary, MasterData, WorkItem } from '../domain/types';
 
 /** 案件存取。單機版一案一筆存 IndexedDB；協作版對應後端 /cases API。 */
 export interface CaseRepository {
@@ -34,8 +34,15 @@ export interface CaseRepository {
  * 協作版：對應後端 /masters API，多人共用同一份主檔。
  */
 export interface MasterRepository {
-  /** 載入全域主檔（單機版：seed；協作版：後端）。 */
+  /**
+   * 載入全域主檔（單機版：seed 種子 + 使用者自訂工項合併；協作版：後端）。
+   * 回傳的 workItems 已含使用者新增的自訂工項（custom=true）。
+   */
   load(): Promise<MasterData>;
+  /** 新增/更新一筆自訂工項（upsert，依 code）。種子工項不由此寫入。 */
+  saveWorkItem(item: WorkItem): Promise<void>;
+  /** 刪除一筆自訂工項。 */
+  deleteWorkItem(code: string): Promise<void>;
 }
 
 /** 一組完整的資料存取實作（由工廠 getRepositories 提供）。 */

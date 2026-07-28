@@ -11,10 +11,10 @@
  * 因此 stores 的設計已預留擴充空間（bump DB_VERSION + 在 upgrade 補建）。
  */
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Case } from '../../domain/types';
+import type { Case, WorkItem } from '../../domain/types';
 
 export const DB_NAME = 'budget-inquiry-system';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export interface BudgetDB extends DBSchema {
   cases: {
@@ -25,6 +25,11 @@ export interface BudgetDB extends DBSchema {
   meta: {
     key: string;
     value: unknown;
+  };
+  /** 使用者新增的自訂工項（跨案共用）；keyPath: code。種子工項不進此 store。 */
+  customItems: {
+    key: string;
+    value: WorkItem;
   };
 }
 
@@ -40,6 +45,10 @@ export function getDB(): Promise<IDBPDatabase<BudgetDB>> {
         }
         if (!db.objectStoreNames.contains('meta')) {
           db.createObjectStore('meta');
+        }
+        // v2：使用者自訂工項 store。
+        if (!db.objectStoreNames.contains('customItems')) {
+          db.createObjectStore('customItems', { keyPath: 'code' });
         }
       },
     });
