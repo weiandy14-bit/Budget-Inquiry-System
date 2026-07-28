@@ -67,15 +67,17 @@ export interface DerivedRule {
 
 /** 子系統定義（火警/廣播/泡沫…） */
 export interface SubSystemDef {
-  no: string; // 序號（可為 "8+"）
-  name: string; // 名稱，例：火警系統
-  key: string; // 系統鍵，例：fire
+  no: string; // 序號
+  name: string; // 名稱，例：火警設備工程
+  key: string; // 系統鍵（全案唯一），例：fire
   status: string; // 狀態：工率齊全 / 待建 …
+  bigKey: string; // 所屬大系統鍵，例：fire-protection
 }
 
-/** 大系統定義（消防系統，未來電力/弱電以相同結構複製） */
+/** 大系統定義（工程大類：電氣/電信弱電/給排水/消防/空調） */
 export interface BigSystemDef {
-  name: string; // 大系統名稱，例：消防系統
+  key: string; // 大系統鍵，例：fire-protection
+  name: string; // 大系統名稱，例：消防系統工程
   subsystems: SubSystemDef[];
 }
 
@@ -92,7 +94,7 @@ export interface MasterData {
   workItems: WorkItem[];
   quantityRules: QuantityRule[];
   derivedRules: DerivedRule[];
-  bigSystem: BigSystemDef;
+  bigSystems: BigSystemDef[];
   defaults: SeedDefaults;
 }
 
@@ -110,6 +112,14 @@ export interface LineItem {
   /** 穩定的列 id（UI 操作、去重用；非工項碼） */
   id: string;
   code: string; // 工項碼（手填）
+  /**
+   * 本案規格文字（標單「品名規格」欄的規格段）；'' = 沿用主檔 WorkItem.spec。
+   * 用於受信總機這類「品名固定、規格逐案填」的設備：點數等本案需求（例
+   * 「點數不低於2500點」「案件需求2310點」）為任意值、措辭逐案不同，
+   * 寫在這裡即可，不必為每個點數另開工項碼——材料單價/工率的跨案經驗仍集中在同一碼。
+   * 純描述文字，不進任何計算。
+   */
+  spec: string;
   qty: number; // 材料數量
   /**
    * 工資數量（規格 §6.3 預留欄位）。
@@ -144,6 +154,8 @@ export interface Case {
   matOverride: Record<string, number>;
   /** 各系統的明細列 { sysKey: LineItem[] } */
   systems: Record<string, LineItem[]>;
+  /** 使用者於本案新增的子系統（§6.2）；空陣列＝僅用主檔預設子系統。 */
+  customSystems: SubSystemDef[];
 }
 
 /** 案件清單摘要（閘門畫面用，避免載入整包 systems） */

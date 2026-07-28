@@ -6,7 +6,6 @@
 import seedJson from '../seed/seed_data.json';
 import type {
   BaseGroup,
-  BigSystemDef,
   Case,
   CostGroup,
   DerivedRule,
@@ -16,6 +15,7 @@ import type {
   SeedDefaults,
   WorkItem,
 } from './types';
+import { buildBigSystems } from './bigSystems';
 
 // seed_data.json 的原始（中文鍵）形狀，僅標註本檔會用到的欄位。
 interface RawWorkItem {
@@ -97,18 +97,6 @@ function parseDerivedRules(): DerivedRule[] {
   }));
 }
 
-function parseBigSystem(): BigSystemDef {
-  return {
-    name: raw.大系統定義.名稱,
-    subsystems: raw.大系統定義.子系統.map((s) => ({
-      no: String(s.no),
-      name: s.name,
-      key: s.key,
-      status: s.狀態,
-    })),
-  };
-}
-
 function parseDefaults(): SeedDefaults {
   const p = raw.參數預設值;
   return {
@@ -125,7 +113,7 @@ export function loadMasterData(): MasterData {
     workItems: parseWorkItems(),
     quantityRules: parseQuantityRules(),
     derivedRules: parseDerivedRules(),
-    bigSystem: parseBigSystem(),
+    bigSystems: buildBigSystems(),
     defaults: parseDefaults(),
   };
 }
@@ -139,6 +127,7 @@ export function buildFireSampleCase(master: MasterData): Case {
   const lines: LineItem[] = raw.火警範例案.map((r, i) => ({
     id: `fire-${i + 1}`,
     code: r.工項碼,
+    spec: '',
     qty: r.數量,
     workQty: null,
     tierManual: '',
@@ -149,7 +138,7 @@ export function buildFireSampleCase(master: MasterData): Case {
 
   // 各系統統一檔位預設「普通」；驗證基準即以此檔位還原真實預算書。
   const tiers: Record<string, string> = {};
-  for (const s of master.bigSystem.subsystems) tiers[s.key] = '普通';
+  for (const b of master.bigSystems) for (const s of b.subsystems) tiers[s.key] = '普通';
 
   const derived: Record<string, number> = {};
   for (const d of master.derivedRules) derived[d.name] = d.ratio;
@@ -170,5 +159,6 @@ export function buildFireSampleCase(master: MasterData): Case {
     derived,
     matOverride: {},
     systems: { fire: lines },
+    customSystems: [],
   };
 }

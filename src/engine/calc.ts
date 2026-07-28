@@ -69,6 +69,7 @@ export interface RowResult {
   code: string;
   item: WorkItem | null; // 找不到工項碼時為 null（列為無效列）
   name: string;
+  spec: string; // 採用的規格文字（line.spec 覆寫，否則主檔 spec）；純顯示，不進計算
   unit: string;
   grp: WorkItem['grp'] | '';
   qty: number;
@@ -106,6 +107,7 @@ export function calcRow(
       code: line.code,
       item: null,
       name: '(查無此工項碼)',
+      spec: line.spec ?? '',
       unit: '',
       grp: '',
       qty,
@@ -144,6 +146,7 @@ export function calcRow(
     code: line.code,
     item,
     name: item.name,
+    spec: line.spec || item.spec, // 本案規格覆寫優先，否則沿用主檔規格
     unit: item.unit,
     grp: item.grp,
     qty,

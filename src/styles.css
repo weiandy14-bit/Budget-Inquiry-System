@@ -2,6 +2,7 @@
   font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   color: #1a1a1a;
   background: #f5f6f8;
+  font-size: 14px;
 }
 * {
   box-sizing: border-box;
@@ -9,10 +10,66 @@
 body {
   margin: 0;
 }
+h1 {
+  font-size: 20px;
+  margin: 0;
+}
+h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+h3 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+button {
+  font: inherit;
+  padding: 6px 12px;
+  border: 1px solid #c3c8d0;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+button:hover {
+  background: #eef1f5;
+}
+button.primary {
+  background: #1c4faf;
+  color: #fff;
+  border-color: #1c4faf;
+}
+button.primary:hover {
+  background: #163e8a;
+}
+button.danger {
+  color: #b00020;
+  border-color: #e2b6bd;
+}
+input,
+select {
+  font: inherit;
+  padding: 4px 6px;
+  border: 1px solid #c3c8d0;
+  border-radius: 4px;
+}
+input.input-cell {
+  width: 100%;
+  background: #fffbe6; /* 黃底：使用者輸入欄 */
+  border: 1px solid #e5d98a;
+}
+select.input-cell {
+  background: #fffbe6;
+  border: 1px solid #e5d98a;
+}
+
 .app-shell {
-  max-width: 900px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px 24px 60px;
+}
+.gate {
+  max-width: 720px;
+  margin: 40px auto;
 }
 .card {
   background: #fff;
@@ -21,10 +78,23 @@ body {
   padding: 20px;
   margin-bottom: 16px;
 }
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.spacer {
+  flex: 1;
+}
 .metric {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   color: #0a5;
+}
+.metric-label {
+  color: #667;
+  font-size: 13px;
 }
 .mono {
   font-variant-numeric: tabular-nums;
@@ -32,17 +102,145 @@ body {
 .muted {
   color: #667;
 }
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.tab {
+  padding: 8px 14px;
+  border: 1px solid #e2e5ea;
+  border-radius: 6px 6px 0 0;
+  background: #eef1f5;
+}
+.tab.active {
+  background: #fff;
+  border-bottom-color: #fff;
+  font-weight: 600;
+}
+.sys-switch {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.sys-switch .tab.active {
+  background: #1c4faf;
+  color: #fff;
+  border-color: #1c4faf;
+}
+
+/* 大系統（工程大類）導覽列：文字列 + 選中者藍框強調 */
+.big-switch {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+}
+.big-switch .tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #333;
+}
+.big-switch .tab:hover {
+  background: #eef1f5;
+}
+.big-switch .tab.active {
+  border: 2px solid #2b7fff;
+  background: #eaf2ff;
+  color: #1c4faf;
+  font-weight: 700;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
 }
+.table-scroll {
+  overflow-x: auto;
+}
 th,
 td {
   border: 1px solid #e2e5ea;
-  padding: 6px 10px;
+  padding: 5px 8px;
   text-align: right;
+  white-space: nowrap;
 }
-th:first-child,
-td:first-child {
+th {
+  background: #f0f2f5;
+  position: sticky;
+  top: 0;
+}
+th.l,
+td.l {
   text-align: left;
+}
+tr.invalid td {
+  background: #fff3f3;
+}
+tfoot td {
+  font-weight: 600;
+  background: #f7f9fc;
+}
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.warn {
+  color: #b25a00;
+}
+.ok {
+  color: #0a7a3e;
+}
+.pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eef1f5;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+.stat {
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fff;
+}
+.stat .v {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.link {
+  color: #1c4faf;
+  cursor: pointer;
+  text-decoration: underline;
 }
