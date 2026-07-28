@@ -1,0 +1,546 @@
+# Instincts generated from https://github.com/weiandy14-bit/Budget-Inquiry-System
+# Generated: 2026-07-28T00:22:32.585Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: Budget-Inquiry-System-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Commit Length
+
+## Action
+
+Keep commit messages concise (~30 characters)
+
+## Evidence
+
+- Average commit message length: 30 chars
+- Based on 6 commits
+
+---
+id: Budget-Inquiry-System-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: Budget-Inquiry-System-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: Budget-Inquiry-System-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: Budget-Inquiry-System-test-colocate
+trigger: "when writing tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Test Colocate
+
+## Action
+
+Place test file next to the source file (e.g., Button.test.tsx next to Button.tsx)
+
+## Evidence
+
+- Colocated test pattern detected
+- Tests live alongside source files
+
+---
+id: Budget-Inquiry-System-test-framework
+trigger: "when writing tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Test Framework
+
+## Action
+
+Use playwright as the test framework
+
+## Evidence
+
+- Test framework detected: playwright
+- File pattern: *.test.ts
+
+---
+id: Budget-Inquiry-System-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: Budget-Inquiry-System-test-types
+trigger: "when planning tests for a feature"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Test Types
+
+## Action
+
+Write unit, e2e tests to match project standards
+
+## Evidence
+
+- Test types detected: unit, e2e
+- Coverage config: no
+
+---
+id: Budget-Inquiry-System-workflow-domain-model-schema-change
+trigger: "when doing domain model schema change"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Workflow Domain Model Schema Change
+
+## Action
+
+Follow the domain-model-schema-change workflow:
+1. Edit or create files in src/domain/ (e.g., types.ts, seed.ts, systems.ts, bigSystems.ts)
+2. Update any related calculation or validation logic in src/engine/
+3. Update UI components to reflect new/changed data (src/ui/...)
+4. Update store logic if state shape changes (src/store/useAppStore.ts)
+5. Add or update tests (src/engine/*.test.ts)
+6. Ensure all tests pass
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: src/domain/types.ts, src/domain/seed.ts, src/domain/systems.ts
+
+---
+id: Budget-Inquiry-System-workflow-feature-implementation-with-tests-and-ui
+trigger: "when doing feature implementation with tests and ui"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Workflow Feature Implementation With Tests And Ui
+
+## Action
+
+Follow the feature-implementation-with-tests-and-ui workflow:
+1. Implement or update UI components (src/ui/...)
+2. Update or add domain/model logic (src/domain/...)
+3. Update calculation/validation logic if needed (src/engine/...)
+4. Update store/state management if needed (src/store/useAppStore.ts)
+5. Add or update tests (src/engine/*.test.ts)
+6. Update documentation if needed (README.md)
+7. Ensure all tests pass
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: src/ui/MainApp.tsx, src/ui/tabs/*.tsx, src/domain/types.ts
+
+---
+id: Budget-Inquiry-System-workflow-add-or-update-tests
+trigger: "when doing add or update tests"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Workflow Add Or Update Tests
+
+## Action
+
+Follow the add-or-update-tests workflow:
+1. Write or update unit tests (src/engine/*.test.ts)
+2. Write or update e2e tests (e2e/*.ts)
+3. Update test scripts/configuration (package.json, playwright.config.ts)
+4. Ensure all tests pass
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: src/engine/calc.test.ts, src/engine/checks.test.ts, e2e/app.spec.ts
+
+---
+id: budget-inquiry-system-instinct-file-naming
+trigger: "When creating or renaming a file in the codebase"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct File Naming
+
+## Action
+
+Use camelCase for file names
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Observed in src/ui/MainApp.tsx
+
+---
+id: budget-inquiry-system-instinct-function-naming
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Function Naming
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- Observed in src/engine/calc.ts
+
+---
+id: budget-inquiry-system-instinct-class-naming
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Class Naming
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in namingConventions.classes
+- Observed in src/domain/types.ts
+
+---
+id: budget-inquiry-system-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in namingConventions.constants
+- Observed in src/engine/calc.ts
+
+---
+id: budget-inquiry-system-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Import Style
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in importStyle
+- Observed in src/ui/MainApp.tsx
+
+---
+id: budget-inquiry-system-instinct-export-style
+trigger: "When exporting from a module"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+- Observed in src/domain/types.ts
+
+---
+id: budget-inquiry-system-instinct-test-file-pattern
+trigger: "When creating a test file"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Test File Pattern
+
+## Action
+
+Name the file with a .test.ts suffix
+
+## Evidence
+
+- Pattern in testing.filePattern
+- Files like src/engine/calc.test.ts
+
+---
+id: budget-inquiry-system-instinct-unit-test-location
+trigger: "When adding unit tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Unit Test Location
+
+## Action
+
+Colocate test files next to the implementation in the same folder
+
+## Evidence
+
+- Pattern in architecture.testLocation
+- Files like src/engine/calc.ts and src/engine/calc.test.ts
+
+---
+id: budget-inquiry-system-instinct-e2e-test-location
+trigger: "When adding end-to-end tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct E2e Test Location
+
+## Action
+
+Place e2e test files in the e2e/ folder
+
+## Evidence
+
+- Pattern in architecture.commonFolders
+- File e2e/app.spec.ts
+
+---
+id: budget-inquiry-system-instinct-test-framework
+trigger: "When writing automated tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Test Framework
+
+## Action
+
+Use Playwright as the testing framework
+
+## Evidence
+
+- Pattern in testing.framework
+- playwright.config.ts present
+
+---
+id: budget-inquiry-system-instinct-commit-prefix
+trigger: "When writing a commit message for a new feature"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Commit Prefix
+
+## Action
+
+Prefix the commit message with 'feat:'
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Example: 'feat: 明細列新增本案規格欄（受信總機等逐案規格）'
+
+---
+id: budget-inquiry-system-instinct-commit-language
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Commit Language
+
+## Action
+
+Write concise, descriptive commit messages, often in Chinese
+
+## Evidence
+
+- Pattern in commits.examples
+- Example: '建置畫面（規格 §5）：案件閘門與主應用 7 分頁'
+
+---
+id: budget-inquiry-system-instinct-domain-model-schema-change
+trigger: "When modifying or extending core domain data structures"
+confidence: 0.92
+domain: workflow
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Domain Model Schema Change
+
+## Action
+
+Edit src/domain/ files, update related logic in src/engine/, update UI and store as needed, add/update tests, and ensure all tests pass
+
+## Evidence
+
+- Workflow domain-model-schema-change
+- Commit sequences and files in workflow example
+
+---
+id: budget-inquiry-system-instinct-feature-implementation
+trigger: "When implementing a new user-facing feature or major enhancement"
+confidence: 0.88
+domain: workflow
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Feature Implementation
+
+## Action
+
+Update UI, domain logic, calculation/validation, store, tests, and documentation as needed; ensure all tests pass
+
+## Evidence
+
+- Workflow feature-implementation-with-tests-and-ui
+- Commit sequences and files in workflow example
+
+---
+id: budget-inquiry-system-instinct-add-or-update-tests
+trigger: "When adding a feature, changing logic, or increasing test coverage"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: weiandy14-bit/Budget-Inquiry-System
+---
+
+# Budget Inquiry System Instinct Add Or Update Tests
+
+## Action
+
+Write or update unit and e2e tests, update test scripts/config, and ensure all tests pass
+
+## Evidence
+
+- Workflow add-or-update-tests
+- Commit sequences and files in workflow example
+
