@@ -24,6 +24,15 @@ test('載入火警範例案，日工價=3000 時工資還原至驗收基準 2,28
   await expect(page.getByText('2,286,786').first()).toBeVisible();
 });
 
+test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) => {
+  await openSampleCase(page);
+  await page.getByRole('button', { name: '儲存' }).click();
+  await expect(page.getByRole('heading', { name: '變更報告' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '下載報告' })).toBeVisible();
+  await page.getByRole('button', { name: '關閉' }).click();
+  await expect(page.getByRole('heading', { name: '變更報告' })).toHaveCount(0);
+});
+
 test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '整合標單' }).click();
