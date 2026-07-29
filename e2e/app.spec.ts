@@ -44,6 +44,16 @@ test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ pa
   await expect(page.getByText('配管另件含接線盒(戶外採不鏽鋼)').first()).toBeVisible();
 });
 
+test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備基礎座', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '材料主檔' }).click();
+  // 預設「管線材料」子頁，含預載清單
+  await expect(page.getByText('RSG厚鋼導線管CNS2606')).toBeVisible();
+  // 切到「其他附屬材料」→ 設備基礎座
+  await page.locator('.sys-switch .tab', { hasText: '其他附屬材料' }).click();
+  await expect(page.getByText('設備基礎座')).toBeVisible();
+});
+
 test('大系統兩層導覽：消防 9 項子系統 + 其他大系統為空白占位', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();

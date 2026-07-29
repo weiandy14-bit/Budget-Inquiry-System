@@ -2,7 +2,7 @@
  * 工項工具（純函式，可測）。
  * 支援「明細表打名稱 → 查無則自動建立自訂工項」的解析與建碼邏輯。
  */
-import type { WorkItem } from './types';
+import type { CostGroup, MatCategory, WorkItem } from './types';
 
 /** 名稱正規化：去頭尾空白、統一大小寫，供比對用。 */
 export function normalizeName(s: string): string {
@@ -28,26 +28,41 @@ export function nextCustomCode(items: WorkItem[]): string {
   return code;
 }
 
+/** 依費用群組推導材料主檔顯示分類（工項未明設 matCat 時）。 */
+export function matCategoryOf(w: WorkItem): MatCategory {
+  if (w.matCat) return w.matCat;
+  return w.grp === '設備' ? '設備器材' : '管線材料';
+}
+
+/** 自訂工項建立選項（材料主檔各子頁新增時帶入分類與群組）。 */
+export interface CustomItemOpts {
+  grp?: CostGroup;
+  matCat?: MatCategory;
+  unit?: string;
+}
+
 /**
  * 以名稱建立一筆自訂工項（帶合理預設）。
  * 預設群組為「設備」——最常見的逐案設備（如受信總機）即屬此類，
  * 且設備的工資不入單價，工率可先為 0、之後於工率主檔補；填「本案單價」即可立即計價。
+ * 材料主檔各子頁新增時，以 opts 帶入對應的群組／分類／單位。
  */
-export function buildCustomWorkItem(code: string, name: string): WorkItem {
+export function buildCustomWorkItem(code: string, name: string, opts: CustomItemOpts = {}): WorkItem {
   return {
     code,
     sys: 'U',
-    sub: '自訂工項',
+    sub: opts.matCat ?? '自訂工項',
     name: name.trim(),
     spec: '',
-    unit: '式',
+    unit: opts.unit ?? '式',
     lay: '—',
-    grp: '設備',
+    grp: opts.grp ?? '設備',
     rateHi: 0,
     rateMid: 0,
     rateLo: 0,
     rule: '—',
     refPrice: 0,
+    matCat: opts.matCat,
     custom: true,
   };
 }
