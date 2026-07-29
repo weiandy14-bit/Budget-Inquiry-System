@@ -12,6 +12,11 @@
 export type CostGroup = '設備' | '管材' | '電線';
 export type BaseGroup = CostGroup | '實體';
 
+// ─── 材料主檔顯示分類 ────────────────────────────────────────
+// 純顯示用（不影響計算的費用群組 CostGroup）：材料主檔分三個子頁呈現。
+export type MatCategory = '管線材料' | '設備器材' | '其他附屬材料';
+export const MAT_CATEGORIES: MatCategory[] = ['管線材料', '設備器材', '其他附屬材料'];
+
 // ─── 工率檔位 ────────────────────────────────────────────────
 // 三檔工率：最高 / 普通 / 最低。內部一律用此三個字面值，與 seed 資料一致。
 export type Tier = '最高' | '普通' | '最低';
@@ -40,6 +45,8 @@ export interface WorkItem {
   rule: string;
   /** 參考材料單價（訪價基準，起手用；0 代表尚無參考價） */
   refPrice: number;
+  /** 材料主檔顯示分類；未設定時依費用群組推導（見 matCategoryOf）。純顯示，不進計算。 */
+  matCat?: MatCategory;
   /**
    * 是否為使用者新增的自訂工項（非 seed 種子）。
    * true = 使用者在明細表打名稱時「查無 → 自動建碼」產生，持久化於 IndexedDB、跨案共用、可編輯/刪除；

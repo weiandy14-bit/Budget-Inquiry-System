@@ -11,6 +11,7 @@ import type {
   DerivedRule,
   LineItem,
   MasterData,
+  MatCategory,
   QuantityRule,
   SeedDefaults,
   WorkItem,
@@ -32,6 +33,7 @@ interface RawWorkItem {
   工率_最低: number;
   數量規則: string;
   參考材料單價: number;
+  材料分類?: string;
 }
 interface RawSeed {
   參數預設值: {
@@ -76,6 +78,7 @@ function parseWorkItems(): WorkItem[] {
     rateLo: r.工率_最低,
     rule: r.數量規則,
     refPrice: r.參考材料單價,
+    matCat: (r.材料分類 as MatCategory | undefined) || undefined,
   }));
 }
 

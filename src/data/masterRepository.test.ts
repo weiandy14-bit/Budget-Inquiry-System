@@ -22,9 +22,9 @@ describe('SeedMasterRepository 自訂工項合併', () => {
     repo = new SeedMasterRepository();
   });
 
-  it('初始只有種子工項（99 項）', async () => {
+  it('初始只有種子工項（114 項）', async () => {
     const m = await repo.load();
-    expect(m.workItems.length).toBe(99);
+    expect(m.workItems.length).toBe(114);
     expect(m.workItems.some((w) => w.custom)).toBe(false);
   });
 
@@ -48,6 +48,6 @@ describe('SeedMasterRepository 自訂工項合併', () => {
   it('種子工項數不受自訂增刪影響', async () => {
     await repo.saveWorkItem(buildCustomWorkItem('U-0001', 'A'));
     const m = await repo.load();
-    expect(m.workItems.filter((w) => !w.custom).length).toBe(99);
+    expect(m.workItems.filter((w) => !w.custom).length).toBe(114);
   });
 });

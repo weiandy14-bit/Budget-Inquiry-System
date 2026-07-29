@@ -15,11 +15,15 @@ const index = indexMaster(master);
 const REAL_BOOK_LABOR = 2_250_000;
 
 describe('種子資料載入', () => {
-  it('工項數與 meta 一致（99 項）', () => {
-    expect(master.workItems.length).toBe(99);
+  it('工項數：火警種子 99 + 材料主檔預載 15 = 114 項', () => {
+    expect(master.workItems.length).toBe(114);
   });
-  it('有材料價項數為 30', () => {
+  it('有材料價項數為 30（預載材料價為 0，不影響）', () => {
     expect(master.workItems.filter((w) => w.refPrice > 0).length).toBe(30);
+  });
+  it('材料主檔預載：管線材料 14 + 其他附屬材料 1', () => {
+    expect(master.workItems.filter((w) => w.matCat === '管線材料').length).toBe(14);
+    expect(master.workItems.filter((w) => w.matCat === '其他附屬材料').length).toBe(1);
   });
   it('參數預設值正確', () => {
     expect(master.defaults.wage).toBe(4475);

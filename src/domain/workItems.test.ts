@@ -1,7 +1,12 @@
 /** 工項工具（名稱解析 / 自動建碼 / 自訂工項預設）單元測試。 */
 import { describe, expect, it } from 'vitest';
 import { loadMasterData } from './seed';
-import { buildCustomWorkItem, findWorkItemByName, nextCustomCode } from './workItems';
+import {
+  buildCustomWorkItem,
+  findWorkItemByName,
+  matCategoryOf,
+  nextCustomCode,
+} from './workItems';
 
 const master = loadMasterData();
 
@@ -26,6 +31,18 @@ describe('nextCustomCode', () => {
   it('跳過已用的自訂碼', () => {
     const items = [...master.workItems, buildCustomWorkItem('U-0001', 'A'), buildCustomWorkItem('U-0002', 'B')];
     expect(nextCustomCode(items)).toBe('U-0003');
+  });
+});
+
+describe('matCategoryOf', () => {
+  it('明設 matCat 優先', () => {
+    const w = buildCustomWorkItem('U-1', '設備基礎座', { matCat: '其他附屬材料', grp: '設備' });
+    expect(matCategoryOf(w)).toBe('其他附屬材料');
+  });
+  it('未設時依費用群組推導：設備→設備器材、管材/電線→管線材料', () => {
+    expect(matCategoryOf(master.workItems.find((w) => w.grp === '設備')!)).toBe('設備器材');
+    expect(matCategoryOf(master.workItems.find((w) => w.grp === '管材')!)).toBe('管線材料');
+    expect(matCategoryOf(master.workItems.find((w) => w.grp === '電線')!)).toBe('管線材料');
   });
 });
 

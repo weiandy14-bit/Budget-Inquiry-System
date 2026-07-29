@@ -13,7 +13,12 @@ import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier, WorkI
 import { getRepositories } from '../data';
 import { buildFireSampleCase } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
-import { buildCustomWorkItem, findWorkItemByName, nextCustomCode } from '../domain/workItems';
+import {
+  buildCustomWorkItem,
+  findWorkItemByName,
+  nextCustomCode,
+  type CustomItemOpts,
+} from '../domain/workItems';
 import { indexMaster } from '../engine/calc';
 import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
 
@@ -72,8 +77,8 @@ interface AppState {
   saveNewVersion: (memo: string) => Promise<void>;
 
   // ── 全域主檔：使用者自訂工項（跨案共用，持久化於 IndexedDB）──
-  /** 以名稱新增一筆自訂工項（自動配碼），寫入主檔並回傳。 */
-  createWorkItem: (name: string) => Promise<WorkItem>;
+  /** 以名稱新增一筆自訂工項（自動配碼），寫入主檔並回傳；opts 帶入群組／材料分類／單位。 */
+  createWorkItem: (name: string, opts?: CustomItemOpts) => Promise<WorkItem>;
   /** 更新一筆自訂工項欄位（種子工項不可改，會被忽略）。 */
   updateWorkItem: (code: string, patch: Partial<WorkItem>) => Promise<void>;
   /** 刪除一筆自訂工項（種子工項不可刪，會被忽略）。 */
@@ -309,12 +314,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     await get().refreshList();
   },
 
-  async createWorkItem(name) {
+  async createWorkItem(name, opts) {
     const { masters } = getRepositories();
     const master = get().master;
     if (!master) throw new Error('主檔尚未載入');
     const code = nextCustomCode(master.workItems);
-    const item = buildCustomWorkItem(code, name);
+    const item = buildCustomWorkItem(code, name, opts);
     await masters.saveWorkItem(item);
     set({ master: await masters.load() }); // 重新載入主檔，讓計算索引納入新工項
     return item;
