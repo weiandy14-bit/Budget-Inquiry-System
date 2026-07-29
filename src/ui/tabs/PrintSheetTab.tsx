@@ -78,7 +78,6 @@ export function PrintSheetTab() {
                     <tr>
                       <th>項次</th>
                       <th className="l">項目</th>
-                      <th className="l">規格</th>
                       <th>單位</th>
                       <th>數量</th>
                       <th>單價</th>
@@ -90,8 +89,12 @@ export function PrintSheetTab() {
                     {sec.rows.map((row, i) => (
                       <tr key={i} className={row.kind === 'physical' ? '' : 'sheet-derived'}>
                         <td className="mono">{i + 1}</td>
-                        <td className="l">{row.name}</td>
-                        <td className="l muted">{row.spec && row.spec !== '—' ? row.spec : ''}</td>
+                        <td className="l">
+                          {row.name}
+                          {row.spec && row.spec !== '—' && (
+                            <span className="muted">　{row.spec}</span>
+                          )}
+                        </td>
                         <td>{row.unit}</td>
                         <td className="mono">{row.qty == null ? '' : num(row.qty, 0)}</td>
                         <td className="mono">{row.unitPrice == null ? '' : money(row.unitPrice)}</td>
@@ -102,7 +105,7 @@ export function PrintSheetTab() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={6} className="l">
+                      <td colSpan={5} className="l">
                         系統小計（實體＋衍生；工資已分攤於配管配線單價，另列僅供參考）
                       </td>
                       <td className="mono">{money(sec.subtotal)}</td>
