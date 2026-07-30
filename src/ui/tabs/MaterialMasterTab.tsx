@@ -7,7 +7,9 @@ import { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { money } from '../format';
+import { downloadText, pickTextFile } from '../download';
 import { matCategoryOf } from '../../domain/workItems';
+import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
 import { MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
 
 // 各子頁新增自訂材料時的預設群組／單位。
@@ -24,8 +26,20 @@ export function MaterialMasterTab() {
   const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const createWorkItem = useAppStore((s) => s.createWorkItem);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
+  const importMaterials = useAppStore((s) => s.importMaterials);
   const [cat, setCat] = useState<MatCategory>('管線材料');
   const [q, setQ] = useState('');
+  const [importMsg, setImportMsg] = useState('');
+
+  async function handleImport() {
+    const text = await pickTextFile('.csv');
+    if (text == null) return;
+    const { items, errors } = parseMaterialCsv(text, { matCat: cat });
+    const n = items.length ? await importMaterials(items) : 0;
+    const parts = [`匯入 ${n} 筆`];
+    if (errors.length) parts.push(`略過 ${errors.length} 列（${errors[0]}${errors.length > 1 ? '…' : ''}）`);
+    setImportMsg(parts.join('；'));
+  }
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { 管線材料: 0, 設備器材: 0, 其他附屬材料: 0 };
@@ -75,7 +89,18 @@ export function MaterialMasterTab() {
         >
           ＋ 新增{cat}
         </button>
+        <button onClick={handleImport}>匯入 CSV</button>
+        <button
+          onClick={() => downloadText('材料匯入範本.csv', MATERIAL_CSV_TEMPLATE, 'text/csv')}
+        >
+          下載範本
+        </button>
       </div>
+      {importMsg && (
+        <p className="muted" style={{ marginTop: -4 }}>
+          {importMsg}
+        </p>
+      )}
 
       <div className="table-scroll" style={{ maxHeight: 560, overflowY: 'auto' }}>
         <table>
