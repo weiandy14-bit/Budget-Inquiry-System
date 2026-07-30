@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { num } from '../format';
+import { orderedWorkItems } from '../../domain/workItems';
 import type { CostGroup } from '../../domain/types';
 
 const GROUPS: CostGroup[] = ['設備', '管材', '電線'];
@@ -10,16 +11,17 @@ const GROUPS: CostGroup[] = ['設備', '管材', '電線'];
 export function RateMasterTab() {
   const master = useAppStore((s) => s.master);
   const createWorkItem = useAppStore((s) => s.createWorkItem);
+  const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
   const [q, setQ] = useState('');
 
   const items = useMemo(() => {
-    const items = master?.workItems ?? [];
     const kw = q.trim().toLowerCase();
-    if (!kw) return items;
-    return items.filter(
+    return orderedWorkItems(
+      master?.workItems ?? [],
       (w) =>
+        !kw ||
         w.code.toLowerCase().includes(kw) ||
         w.name.toLowerCase().includes(kw) ||
         w.spec.toLowerCase().includes(kw) ||
@@ -134,14 +136,11 @@ export function RateMasterTab() {
                       onChange={(e) => updateWorkItem(w.code, { rateLo: Number(e.target.value) })}
                     />
                   </td>
-                  <td>
-                    <button
-                      className="danger"
-                      title="刪除此自訂工項"
-                      onClick={() => {
-                        if (confirm(`刪除自訂工項「${w.name}」（${w.code}）？`)) deleteWorkItem(w.code);
-                      }}
-                    >
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <button title="於此列下方插入一列" onClick={() => insertWorkItemAfter(w.code)}>
+                      ＋
+                    </button>{' '}
+                    <button className="danger" title="刪除此自訂工項" onClick={() => deleteWorkItem(w.code)}>
                       ×
                     </button>
                   </td>
@@ -157,7 +156,12 @@ export function RateMasterTab() {
                   <td className="mono">{num(w.rateHi, 3)}</td>
                   <td className="mono">{num(w.rateMid, 3)}</td>
                   <td className="mono">{num(w.rateLo, 3)}</td>
-                  <td className="muted" style={{ textAlign: 'center' }}>種子</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <button title="於此列下方插入一列" onClick={() => insertWorkItemAfter(w.code)}>
+                      ＋
+                    </button>{' '}
+                    <span className="muted">種子</span>
+                  </td>
                 </tr>
               ),
             )}

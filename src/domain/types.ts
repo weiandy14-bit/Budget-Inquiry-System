@@ -47,6 +47,8 @@ export interface WorkItem {
   refPrice: number;
   /** 材料主檔顯示分類；未設定時依費用群組推導（見 matCategoryOf）。純顯示，不進計算。 */
   matCat?: MatCategory;
+  /** 顯示排序鍵（自訂工項用；可插於中間）。未設定時以主檔陣列索引為序。純顯示，不進計算。 */
+  order?: number;
   /**
    * 是否為使用者新增的自訂工項（非 seed 種子）。
    * true = 使用者在明細表打名稱時「查無 → 自動建碼」產生，持久化於 IndexedDB、跨案共用、可編輯/刪除；

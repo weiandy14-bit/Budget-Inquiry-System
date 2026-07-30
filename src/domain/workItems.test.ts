@@ -2,10 +2,13 @@
 import { describe, expect, it } from 'vitest';
 import { loadMasterData } from './seed';
 import {
+  appendOrder,
   buildCustomWorkItem,
   findWorkItemByName,
+  insertOrderAfter,
   matCategoryOf,
   nextCustomCode,
+  orderedWorkItems,
 } from './workItems';
 
 const master = loadMasterData();
@@ -43,6 +46,41 @@ describe('matCategoryOf', () => {
     expect(matCategoryOf(master.workItems.find((w) => w.grp === '設備')!)).toBe('設備器材');
     expect(matCategoryOf(master.workItems.find((w) => w.grp === '管材')!)).toBe('管線材料');
     expect(matCategoryOf(master.workItems.find((w) => w.grp === '電線')!)).toBe('管線材料');
+  });
+});
+
+describe('工項排序與中間插入', () => {
+  const catItems = orderedWorkItems(master.workItems, (w) => matCategoryOf(w) === '管線材料');
+  const first = catItems[0];
+  const second = catItems[1];
+
+  it('appendOrder 大於所有現有鍵', () => {
+    expect(appendOrder(master.workItems)).toBeGreaterThan(master.workItems.length - 1);
+  });
+
+  it('insertOrderAfter 落在該列與下一列鍵之間', () => {
+    const k = insertOrderAfter(master.workItems, first.code, '管線材料');
+    const i0 = master.workItems.indexOf(first);
+    const i1 = master.workItems.indexOf(second);
+    expect(k).toBeGreaterThan(i0);
+    expect(k).toBeLessThan(i1);
+  });
+
+  it('orderedWorkItems 將帶 order 的自訂項插入種子之間', () => {
+    const i0 = master.workItems.indexOf(first);
+    const inserted = {
+      ...buildCustomWorkItem('U-9999', 'X 插入', { matCat: '管線材料', grp: '管材' }),
+      order: i0 + 0.5,
+    };
+    const ordered = orderedWorkItems(
+      [...master.workItems, inserted],
+      (w) => matCategoryOf(w) === '管線材料',
+    ).map((w) => w.code);
+    const p1 = ordered.indexOf(first.code);
+    const pi = ordered.indexOf('U-9999');
+    const p2 = ordered.indexOf(second.code);
+    expect(p1).toBeLessThan(pi);
+    expect(pi).toBeLessThan(p2);
   });
 });
 

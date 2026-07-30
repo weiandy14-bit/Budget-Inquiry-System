@@ -34,6 +34,37 @@ export function matCategoryOf(w: WorkItem): MatCategory {
   return w.grp === '設備' ? '設備器材' : '管線材料';
 }
 
+/** 工項顯示排序鍵：自訂項 order 優先，否則以其在主檔陣列的索引為序（種子維持原序）。 */
+export function orderKeyOf(w: WorkItem, indexInMaster: number): number {
+  return w.order ?? indexInMaster;
+}
+
+/** 依顯示排序鍵排序全部工項後，套用篩選（保持種子原序、自訂項可插中間）。 */
+export function orderedWorkItems(all: WorkItem[], filter?: (w: WorkItem) => boolean): WorkItem[] {
+  return all
+    .map((w, i) => ({ w, k: orderKeyOf(w, i) }))
+    .sort((a, b) => a.k - b.k)
+    .map((x) => x.w)
+    .filter((w) => (filter ? filter(w) : true));
+}
+
+/** 計算「在 afterCode 之後插入」的排序鍵：取該列與其後一列（同分類）鍵的中點。 */
+export function insertOrderAfter(all: WorkItem[], afterCode: string, sameCat: MatCategory): number {
+  const keyed = all.map((w, i) => ({ w, k: orderKeyOf(w, i) }));
+  const inCat = keyed.filter((x) => matCategoryOf(x.w) === sameCat).sort((a, b) => a.k - b.k);
+  const maxKey = keyed.reduce((m, x) => Math.max(m, x.k), 0);
+  const pos = inCat.findIndex((x) => x.w.code === afterCode);
+  if (pos < 0) return maxKey + 1; // 找不到 → 附加末尾
+  const afterKey = inCat[pos].k;
+  const nextKey = pos + 1 < inCat.length ? inCat[pos + 1].k : afterKey + 1;
+  return (afterKey + nextKey) / 2;
+}
+
+/** 附加於末尾的排序鍵（大於現有所有鍵）。 */
+export function appendOrder(all: WorkItem[]): number {
+  return all.reduce((m, w, i) => Math.max(m, orderKeyOf(w, i)), 0) + 1;
+}
+
 /** 自訂工項建立選項（材料主檔各子頁新增時帶入分類與群組）。 */
 export interface CustomItemOpts {
   grp?: CostGroup;
