@@ -21,6 +21,7 @@ import {
 } from '../domain/workItems';
 import { indexMaster } from '../engine/calc';
 import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
+import type { ParsedMaterial } from '../domain/materialCsv';
 
 let lineSeq = 0;
 function newLineId(): string {
@@ -83,6 +84,8 @@ interface AppState {
   updateWorkItem: (code: string, patch: Partial<WorkItem>) => Promise<void>;
   /** 刪除一筆自訂工項（種子工項不可刪，會被忽略）。 */
   deleteWorkItem: (code: string) => Promise<void>;
+  /** 批次匯入材料（CSV 解析後的列），各配自訂碼寫入主檔並重載；回傳匯入筆數。 */
+  importMaterials: (rows: ParsedMaterial[]) => Promise<number>;
   /**
    * 明細表「打名稱→自動建碼」：
    * 依名稱解析既有工項並設定該列 code；查無則自動新增自訂工項再指派。
@@ -341,6 +344,34 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!item || !item.custom) return; // 只允許刪自訂工項
     await masters.deleteWorkItem(code);
     set({ master: await masters.load() });
+  },
+
+  async importMaterials(rows) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    if (!master || rows.length === 0) return 0;
+    const used = new Set(master.workItems.map((w) => w.code));
+    let n = 1;
+    const nextCode = () => {
+      let c = `U-${String(n).padStart(4, '0')}`;
+      while (used.has(c)) {
+        n += 1;
+        c = `U-${String(n).padStart(4, '0')}`;
+      }
+      used.add(c);
+      n += 1;
+      return c;
+    };
+    for (const r of rows) {
+      const base = buildCustomWorkItem(nextCode(), r.name, {
+        grp: r.grp,
+        matCat: r.matCat,
+        unit: r.unit,
+      });
+      await masters.saveWorkItem({ ...base, spec: r.spec, refPrice: r.refPrice });
+    }
+    set({ master: await masters.load() }); // 全部寫入後重載一次
+    return rows.length;
   },
 
   async assignLineByName(sysKey, lineId, name) {
