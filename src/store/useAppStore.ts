@@ -14,8 +14,11 @@ import { getRepositories } from '../data';
 import { buildFireSampleCase } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
 import {
+  appendOrder,
   buildCustomWorkItem,
   findWorkItemByName,
+  insertOrderAfter,
+  matCategoryOf,
   nextCustomCode,
   type CustomItemOpts,
 } from '../domain/workItems';
@@ -78,8 +81,10 @@ interface AppState {
   saveNewVersion: (memo: string) => Promise<void>;
 
   // ── 全域主檔：使用者自訂工項（跨案共用，持久化於 IndexedDB）──
-  /** 以名稱新增一筆自訂工項（自動配碼），寫入主檔並回傳；opts 帶入群組／材料分類／單位。 */
+  /** 以名稱新增一筆自訂工項（自動配碼，附加於末尾），寫入主檔並回傳；opts 帶入群組／材料分類／單位。 */
   createWorkItem: (name: string, opts?: CustomItemOpts) => Promise<WorkItem>;
+  /** 於指定工項之後插入一筆自訂工項（同分類，排序落在該列與下一列中間）。 */
+  insertWorkItemAfter: (afterCode: string, name?: string, opts?: CustomItemOpts) => Promise<WorkItem>;
   /** 更新一筆自訂工項欄位（種子工項不可改，會被忽略）。 */
   updateWorkItem: (code: string, patch: Partial<WorkItem>) => Promise<void>;
   /** 刪除一筆自訂工項（種子工項不可刪，會被忽略）。 */
@@ -322,9 +327,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     const master = get().master;
     if (!master) throw new Error('主檔尚未載入');
     const code = nextCustomCode(master.workItems);
-    const item = buildCustomWorkItem(code, name, opts);
+    const item = { ...buildCustomWorkItem(code, name, opts), order: appendOrder(master.workItems) };
     await masters.saveWorkItem(item);
     set({ master: await masters.load() }); // 重新載入主檔，讓計算索引納入新工項
+    return item;
+  },
+
+  async insertWorkItemAfter(afterCode, name = '新項目', opts) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    if (!master) throw new Error('主檔尚未載入');
+    const afterItem = master.workItems.find((w) => w.code === afterCode);
+    // 預設沿用上一列的群組／分類／單位，讓插入的列與鄰列同性質。
+    const base: CustomItemOpts = afterItem
+      ? { grp: afterItem.grp, matCat: matCategoryOf(afterItem), unit: afterItem.unit }
+      : {};
+    const cat = opts?.matCat ?? base.matCat ?? '管線材料';
+    const code = nextCustomCode(master.workItems);
+    const order = insertOrderAfter(master.workItems, afterCode, cat);
+    const item = { ...buildCustomWorkItem(code, name, { ...base, ...opts }), order };
+    await masters.saveWorkItem(item);
+    set({ master: await masters.load() });
     return item;
   },
 
@@ -362,13 +385,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       n += 1;
       return c;
     };
+    let ord = appendOrder(master.workItems);
     for (const r of rows) {
       const base = buildCustomWorkItem(nextCode(), r.name, {
         grp: r.grp,
         matCat: r.matCat,
         unit: r.unit,
       });
-      await masters.saveWorkItem({ ...base, spec: r.spec, refPrice: r.refPrice });
+      await masters.saveWorkItem({ ...base, spec: r.spec, refPrice: r.refPrice, order: ord });
+      ord += 1;
     }
     set({ master: await masters.load() }); // 全部寫入後重載一次
     return rows.length;

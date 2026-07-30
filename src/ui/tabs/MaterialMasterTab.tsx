@@ -8,7 +8,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { money } from '../format';
 import { downloadText, pickTextFile } from '../download';
-import { matCategoryOf } from '../../domain/workItems';
+import { matCategoryOf, orderedWorkItems } from '../../domain/workItems';
 import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
 import { MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
 
@@ -25,6 +25,7 @@ export function MaterialMasterTab() {
   const setMatOverride = useAppStore((s) => s.setMatOverride);
   const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const createWorkItem = useAppStore((s) => s.createWorkItem);
+  const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
   const importMaterials = useAppStore((s) => s.importMaterials);
   const [cat, setCat] = useState<MatCategory>('管線材料');
@@ -49,15 +50,15 @@ export function MaterialMasterTab() {
 
   const items = useMemo(() => {
     const kw = q.trim().toLowerCase();
-    return (master?.workItems ?? [])
-      .filter((w) => matCategoryOf(w) === cat)
-      .filter(
-        (w) =>
-          !kw ||
+    return orderedWorkItems(
+      master?.workItems ?? [],
+      (w) =>
+        matCategoryOf(w) === cat &&
+        (!kw ||
           w.code.toLowerCase().includes(kw) ||
           w.name.toLowerCase().includes(kw) ||
-          w.spec.toLowerCase().includes(kw),
-      );
+          w.spec.toLowerCase().includes(kw)),
+    );
   }, [master, cat, q]);
 
   if (!master || !current) return null;
@@ -176,14 +177,15 @@ export function MaterialMasterTab() {
                     }
                   />
                 </td>
-                <td>
+                <td style={{ whiteSpace: 'nowrap' }}>
+                  <button title="於此列下方插入一列" onClick={() => insertWorkItemAfter(w.code, '新材料')}>
+                    ＋
+                  </button>{' '}
                   {w.custom && (
                     <button
                       className="danger"
                       title="刪除此自訂材料"
-                      onClick={() => {
-                        if (confirm(`刪除自訂材料「${w.name}」（${w.code}）？`)) deleteWorkItem(w.code);
-                      }}
+                      onClick={() => deleteWorkItem(w.code)}
                     >
                       ×
                     </button>
