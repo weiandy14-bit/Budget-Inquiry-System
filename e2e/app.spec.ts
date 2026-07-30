@@ -54,7 +54,7 @@ test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備�
   await expect(page.getByText('設備基礎座')).toBeVisible();
 });
 
-test('大系統兩層導覽：消防 9 項子系統 + 其他大系統為空白占位', async ({ page }) => {
+test('大系統兩層導覽：消防 9 項子系統 + 電氣子系統結構', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();
 
@@ -62,7 +62,8 @@ test('大系統兩層導覽：消防 9 項子系統 + 其他大系統為空白�
   await expect(page.getByText('火警設備工程')).toBeVisible();
   await expect(page.getByText('消防無線通訊輔助設備工程')).toBeVisible();
 
-  // 切換到「電氣系統工程」→ 空白占位提示
+  // 切換到「電氣系統工程」→ 顯示其子系統結構（第一與最後一項）
   await page.locator('.big-switch .tab', { hasText: '電氣系統工程' }).click();
-  await expect(page.getByText('此大系統尚無子系統')).toBeVisible();
+  await expect(page.getByText('高壓配電盤設備工程')).toBeVisible();
+  await expect(page.getByText('報竣前變更及送電申請(含技師簽證費)')).toBeVisible();
 });
