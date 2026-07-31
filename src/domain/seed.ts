@@ -9,6 +9,7 @@ import type {
   Case,
   CostGroup,
   DerivedRule,
+  InchMeterRate,
   LineItem,
   MasterData,
   MatCategory,
@@ -50,6 +51,10 @@ interface RawSeed {
   數量修正規則: Record<string, { 最高上限: number; 普通上限: number; 說明?: string }>;
   衍生費用規則: Record<string, { 基數群組: string; 預設比率: number; 合理區間: [number, number] }>;
   火警範例案: { 工項碼: string; 數量: number }[];
+  吋米單價表?: {
+    類別: string[];
+    項目: { 管種: string; 系統: string; 價: number[] }[];
+  };
 }
 
 const raw = seedJson as unknown as RawSeed;
@@ -110,14 +115,26 @@ function parseDefaults(): SeedDefaults {
   };
 }
 
+function parseInchMeter(): { categories: string[]; rates: InchMeterRate[] } {
+  const t = raw.吋米單價表;
+  if (!t) return { categories: [], rates: [] };
+  return {
+    categories: t.類別,
+    rates: t.項目.map((r) => ({ type: r.管種, sys: r.系統, prices: r.價 })),
+  };
+}
+
 /** 載入全域主檔（純函式，可在瀏覽器與測試環境同用）。 */
 export function loadMasterData(): MasterData {
+  const im = parseInchMeter();
   return {
     workItems: parseWorkItems(),
     quantityRules: parseQuantityRules(),
     derivedRules: parseDerivedRules(),
     bigSystems: buildBigSystems(),
     defaults: parseDefaults(),
+    inchMeterCategories: im.categories,
+    inchMeterRates: im.rates,
   };
 }
 

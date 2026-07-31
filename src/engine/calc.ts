@@ -15,6 +15,7 @@ import type {
   BaseGroup,
   Case,
   DerivedRule,
+  InchMeterRate,
   MasterData,
   QuantityRule,
   Tier,
@@ -26,6 +27,8 @@ export interface MasterIndex {
   itemsByCode: Map<string, WorkItem>;
   rulesByCode: Map<string, QuantityRule>;
   derivedRules: DerivedRule[];
+  inchMeterCategories: string[];
+  inchMeterRates: InchMeterRate[];
 }
 
 export function indexMaster(master: MasterData): MasterIndex {
@@ -33,6 +36,8 @@ export function indexMaster(master: MasterData): MasterIndex {
     itemsByCode: new Map(master.workItems.map((w) => [w.code, w])),
     rulesByCode: new Map(master.quantityRules.map((r) => [r.code, r])),
     derivedRules: master.derivedRules,
+    inchMeterCategories: master.inchMeterCategories,
+    inchMeterRates: master.inchMeterRates,
   };
 }
 
