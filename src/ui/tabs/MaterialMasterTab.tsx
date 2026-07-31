@@ -9,6 +9,7 @@ import { groupColor } from '../theme';
 import { money } from '../format';
 import { downloadText, pickTextFile } from '../download';
 import { matCategoryOf, orderedWorkItems } from '../../domain/workItems';
+import { imTypeOf } from '../../domain/inchMeter';
 import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
 import { MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
 
@@ -62,6 +63,8 @@ export function MaterialMasterTab() {
   }, [master, cat, q]);
 
   if (!master || !current) return null;
+  const showImType = cat === '管線材料'; // 管線材料子頁顯示「吋米種類」欄
+  const imTypes = master.inchMeterRates.map((r) => r.type);
 
   return (
     <div className="card">
@@ -112,6 +115,7 @@ export function MaterialMasterTab() {
               <th className="l">規格</th>
               <th>單位</th>
               <th>群組</th>
+              {showImType && <th>吋米種類</th>}
               <th>全域參考價</th>
               <th>本案參考價</th>
               <th></th>
@@ -147,6 +151,28 @@ export function MaterialMasterTab() {
                   )}
                 </td>
                 <td style={{ background: groupColor(w.grp) }}>{w.grp}</td>
+                {showImType && (
+                  <td>
+                    {w.grp !== '管材' ? (
+                      <span className="muted">—</span>
+                    ) : w.custom ? (
+                      <select
+                        className="input-cell"
+                        value={w.imType ?? ''}
+                        onChange={(e) => updateWorkItem(w.code, { imType: e.target.value || undefined })}
+                      >
+                        <option value="">（依名稱自動：{imTypeOf(w) ?? '無'}）</option>
+                        {imTypes.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="muted">{imTypeOf(w) ?? '—'}</span>
+                    )}
+                  </td>
+                )}
                 <td>
                   {w.custom ? (
                     <input
@@ -195,7 +221,7 @@ export function MaterialMasterTab() {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={8} className="l muted">
+                <td colSpan={showImType ? 9 : 8} className="l muted">
                   此分類尚無材料，點「＋ 新增{cat}」開始，或匯入既有清單。
                 </td>
               </tr>

@@ -49,6 +49,8 @@ export interface WorkItem {
   matCat?: MatCategory;
   /** 顯示排序鍵（自訂工項用；可插於中間）。未設定時以主檔陣列索引為序。純顯示，不進計算。 */
   order?: number;
+  /** 吋米種類（對應吋米單價表管種；管材用）。未設定時於檢核依名稱推導。僅供合理性檢核吋米方案，不進正式計算。 */
+  imType?: string;
   /**
    * 是否為使用者新增的自訂工項（非 seed 種子）。
    * true = 使用者在明細表打名稱時「查無 → 自動建碼」產生，持久化於 IndexedDB、跨案共用、可編輯/刪除；
@@ -104,6 +106,16 @@ export interface SeedDefaults {
   oldWage: number; // 舊制日工價 3000（用於檢核對照）
 }
 
+/** 吋米單價（合理性檢核「吋米方案」用）：一種管種在四類建築的每吋米工資單價。 */
+export interface InchMeterRate {
+  /** 管種名稱（PVC電管/EMT管/RSG管/鍍鋅鋼管焊接/PVC水管…） */
+  type: string;
+  /** 系統別（電力/機械），供分類顯示 */
+  sys: string;
+  /** 對應 inchMeterCategories 四類建築的單價（元/吋米） */
+  prices: number[];
+}
+
 /** 全域主檔集合（載入後注入計算引擎與 UI） */
 export interface MasterData {
   workItems: WorkItem[];
@@ -111,6 +123,10 @@ export interface MasterData {
   derivedRules: DerivedRule[];
   bigSystems: BigSystemDef[];
   defaults: SeedDefaults;
+  /** 吋米方案的建築類別（四類，順序對應 InchMeterRate.prices）。 */
+  inchMeterCategories: string[];
+  /** 吋米單價表（各管種 × 四類建築）。 */
+  inchMeterRates: InchMeterRate[];
 }
 
 // ─── 案件資料（每案一份，存 IndexedDB）────────────────────────

@@ -23,9 +23,18 @@ describe('runChecks（火警範例案）', () => {
     expect(checks.eqPoints).toBeGreaterThan(0);
   });
 
-  it('三方案工資對照含 3 筆，且舊制還原=總工資', () => {
-    expect(checks.scenarios).toHaveLength(3);
+  it('工資方案對照含 6 筆（舊制/現行 + 吋米四類），舊制還原=總工資', () => {
+    expect(checks.scenarios).toHaveLength(6);
     expect(checks.scenarios[0].labor).toBeCloseTo(checks.totalLabor, 3); // wage 已設 3000
+    const im = checks.scenarios.slice(2);
+    expect(im.map((s) => s.name)).toEqual([
+      '吋米・捷運公共工程',
+      '吋米・高樓辦公大樓',
+      '吋米・集合住宅',
+      '吋米・高科技廠房',
+    ]);
+    // 火警範例案含管材（EMT 等）→ 吋米方案應為正值
+    expect(im.every((s) => s.labor > 0)).toBe(true);
   });
 
   it('未設定本案單價時無同碼同價衝突', () => {

@@ -35,7 +35,7 @@ export function CheckTab() {
       </div>
 
       <div className="card">
-        <h2>三方案工資對照</h2>
+        <h2>工資方案對照（含吋米四類建築）</h2>
         <div className="table-scroll">
           <table>
             <thead>
