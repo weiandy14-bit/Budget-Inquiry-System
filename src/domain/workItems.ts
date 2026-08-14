@@ -34,6 +34,17 @@ export function matCategoryOf(w: WorkItem): MatCategory {
   return w.grp === '設備' ? '設備器材' : '管線材料';
 }
 
+/**
+ * 材料主檔子頁歸屬（比 matCategoryOf 嚴格）：
+ * 只有「型錄材料」才列入材料主檔——明設 matCat 者（管線材料 182 筆＋自訂）、或設備群組（消防設備歸設備器材）。
+ * 管材/電線但未明設分類者（火警種子的工率工項，如 EMT無牙導線鋼管）視為工率工項，不列入材料主檔（避免重複、無牌價）。
+ */
+export function materialSubtabOf(w: WorkItem): MatCategory | null {
+  if (w.matCat) return w.matCat;
+  if (w.grp === '設備') return '設備器材';
+  return null;
+}
+
 /** 工項顯示排序鍵：自訂項 order 優先，否則以其在主檔陣列的索引為序（種子維持原序）。 */
 export function orderKeyOf(w: WorkItem, indexInMaster: number): number {
   return w.order ?? indexInMaster;

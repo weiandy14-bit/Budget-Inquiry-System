@@ -8,7 +8,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { money } from '../format';
 import { downloadText, pickTextFile } from '../download';
-import { matCategoryOf, orderedWorkItems } from '../../domain/workItems';
+import { materialSubtabOf, orderedWorkItems } from '../../domain/workItems';
 import { imTypeOf } from '../../domain/inchMeter';
 import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
 import { MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
@@ -47,7 +47,10 @@ export function MaterialMasterTab() {
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { 管線材料: 0, 設備器材: 0, 其他附屬材料: 0 };
-    for (const w of master?.workItems ?? []) c[matCategoryOf(w)]++;
+    for (const w of master?.workItems ?? []) {
+      const k = materialSubtabOf(w);
+      if (k) c[k]++;
+    }
     return c;
   }, [master]);
 
@@ -56,7 +59,7 @@ export function MaterialMasterTab() {
     return orderedWorkItems(
       master?.workItems ?? [],
       (w) =>
-        matCategoryOf(w) === cat &&
+        materialSubtabOf(w) === cat &&
         (!kw ||
           w.code.toLowerCase().includes(kw) ||
           w.name.toLowerCase().includes(kw) ||
@@ -68,7 +71,7 @@ export function MaterialMasterTab() {
   const plCats = useMemo(() => {
     const seen: string[] = [];
     for (const w of master?.workItems ?? []) {
-      if (matCategoryOf(w) === '管線材料' && w.plCat && !seen.includes(w.plCat)) seen.push(w.plCat);
+      if (materialSubtabOf(w) === '管線材料' && w.plCat && !seen.includes(w.plCat)) seen.push(w.plCat);
     }
     return seen;
   }, [master]);

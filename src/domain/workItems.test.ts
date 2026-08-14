@@ -7,6 +7,7 @@ import {
   findWorkItemByName,
   insertOrderAfter,
   matCategoryOf,
+  materialSubtabOf,
   nextCustomCode,
   orderedWorkItems,
 } from './workItems';
@@ -81,6 +82,19 @@ describe('工項排序與中間插入', () => {
     const p2 = ordered.indexOf(second.code);
     expect(p1).toBeLessThan(pi);
     expect(pi).toBeLessThan(p2);
+  });
+});
+
+describe('materialSubtabOf（材料主檔只列型錄材料）', () => {
+  it('管線材料→該分類；設備無分類→設備器材；管材/電線無分類→null（工率工項不列型錄）', () => {
+    const pl = master.workItems.find((w) => w.matCat === '管線材料')!;
+    expect(materialSubtabOf(pl)).toBe('管線材料');
+    const eq = master.workItems.find((w) => w.grp === '設備' && !w.matCat)!;
+    expect(materialSubtabOf(eq)).toBe('設備器材');
+    const fire = master.workItems.find(
+      (w) => (w.grp === '管材' || w.grp === '電線') && !w.matCat,
+    )!;
+    expect(materialSubtabOf(fire)).toBeNull();
   });
 });
 
