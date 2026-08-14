@@ -35,6 +35,8 @@ interface RawWorkItem {
   數量規則: string;
   參考材料單價: number;
   材料分類?: string;
+  牌價?: number;
+  細類?: string;
 }
 interface RawSeed {
   參數預設值: {
@@ -84,6 +86,8 @@ function parseWorkItems(): WorkItem[] {
     rule: r.數量規則,
     refPrice: r.參考材料單價,
     matCat: (r.材料分類 as MatCategory | undefined) || undefined,
+    listPrice: r.牌價 ?? undefined,
+    plCat: r.細類 || undefined,
   }));
 }
 
