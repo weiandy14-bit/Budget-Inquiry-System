@@ -29,9 +29,11 @@ export function MaterialMasterTab() {
   const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
   const importMaterials = useAppStore((s) => s.importMaterials);
+  const applyListPriceDiscount = useAppStore((s) => s.applyListPriceDiscount);
   const [cat, setCat] = useState<MatCategory>('管線材料');
   const [q, setQ] = useState('');
   const [importMsg, setImportMsg] = useState('');
+  const [discPct, setDiscPct] = useState<Record<string, number>>({});
 
   async function handleImport() {
     const text = await pickTextFile('.csv');
@@ -62,8 +64,17 @@ export function MaterialMasterTab() {
     );
   }, [master, cat, q]);
 
+  // 管線材料的細類（電纜/電線/RSG/EMT/PVC/不鏽鋼管/鍍鋅鋼管），依出現序，供折數拉霸分組。
+  const plCats = useMemo(() => {
+    const seen: string[] = [];
+    for (const w of master?.workItems ?? []) {
+      if (matCategoryOf(w) === '管線材料' && w.plCat && !seen.includes(w.plCat)) seen.push(w.plCat);
+    }
+    return seen;
+  }, [master]);
+
   if (!master || !current) return null;
-  const showImType = cat === '管線材料'; // 管線材料子頁顯示「吋米種類」欄
+  const showImType = cat === '管線材料'; // 管線材料子頁顯示「吋米種類」「牌價」欄與折數拉霸
   const imTypes = master.inchMeterRates.map((r) => r.type);
 
   return (
@@ -106,6 +117,48 @@ export function MaterialMasterTab() {
         </p>
       )}
 
+      {showImType && plCats.length > 0 && (
+        <div className="card" style={{ background: '#f6f8fc', marginBottom: 12 }}>
+          <div className="metric-label" style={{ marginBottom: 6 }}>
+            折數拉霸（牌價 × 折數 → 取整數 → 本案參考價）
+          </div>
+          {plCats.map((pc) => {
+            const pct = discPct[pc] ?? 100;
+            const setPct = (v: number) =>
+              setDiscPct((s) => ({ ...s, [pc]: Math.min(500, Math.max(1, v || 1)) }));
+            return (
+              <div className="row" key={pc} style={{ gap: 8, marginBottom: 4 }}>
+                <span style={{ width: 84 }}>{pc}</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={500}
+                  value={pct}
+                  onChange={(e) => setPct(Number(e.target.value))}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  className="input-cell mono"
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={pct}
+                  onChange={(e) => setPct(Number(e.target.value))}
+                  style={{ width: 64 }}
+                />
+                <span className="muted">%</span>
+                <button className="primary" onClick={() => applyListPriceDiscount(pc, pct)}>
+                  套用
+                </button>
+              </div>
+            );
+          })}
+          <div className="muted">
+            拉到想要的比例後按「套用」，該類所有牌價項的本案參考價即依此重算（範圍 1%~500%）。
+          </div>
+        </div>
+      )}
+
       <div className="table-scroll" style={{ maxHeight: 560, overflowY: 'auto' }}>
         <table>
           <thead>
@@ -116,6 +169,7 @@ export function MaterialMasterTab() {
               <th>單位</th>
               <th>群組</th>
               {showImType && <th>吋米種類</th>}
+              {showImType && <th>牌價</th>}
               <th>全域參考價</th>
               <th>本案參考價</th>
               <th></th>
@@ -173,6 +227,26 @@ export function MaterialMasterTab() {
                     )}
                   </td>
                 )}
+                {showImType && (
+                  <td>
+                    {w.custom ? (
+                      <input
+                        className="input-cell mono"
+                        type="number"
+                        style={{ width: 90 }}
+                        placeholder="牌價"
+                        value={w.listPrice || ''}
+                        onChange={(e) =>
+                          updateWorkItem(w.code, {
+                            listPrice: e.target.value === '' ? undefined : Number(e.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      <span className="mono muted">{w.listPrice ? money(w.listPrice) : '—'}</span>
+                    )}
+                  </td>
+                )}
                 <td>
                   {w.custom ? (
                     <input
@@ -221,7 +295,7 @@ export function MaterialMasterTab() {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={showImType ? 9 : 8} className="l muted">
+                <td colSpan={showImType ? 10 : 8} className="l muted">
                   此分類尚無材料，點「＋ 新增{cat}」開始，或匯入既有清單。
                 </td>
               </tr>

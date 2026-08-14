@@ -15,15 +15,22 @@ const index = indexMaster(master);
 const REAL_BOOK_LABOR = 2_250_000;
 
 describe('種子資料載入', () => {
-  it('工項數：火警種子 99 + 材料主檔預載 15 = 114 項', () => {
-    expect(master.workItems.length).toBe(114);
+  it('工項數：火警種子 99 + 管線材料 182 + 其他附屬材料 1 = 282 項', () => {
+    expect(master.workItems.length).toBe(282);
   });
-  it('有材料價項數為 30（預載材料價為 0，不影響）', () => {
+  it('有材料價項數為 30（管線材料 refPrice 為 0、僅牌價，不影響）', () => {
     expect(master.workItems.filter((w) => w.refPrice > 0).length).toBe(30);
   });
-  it('材料主檔預載：管線材料 14 + 其他附屬材料 1', () => {
-    expect(master.workItems.filter((w) => w.matCat === '管線材料').length).toBe(14);
+  it('材料主檔預載：管線材料 182 + 其他附屬材料 1', () => {
+    expect(master.workItems.filter((w) => w.matCat === '管線材料').length).toBe(182);
     expect(master.workItems.filter((w) => w.matCat === '其他附屬材料').length).toBe(1);
+  });
+  it('管線材料含七細類且皆帶牌價', () => {
+    const pl = master.workItems.filter((w) => w.matCat === '管線材料');
+    expect(new Set(pl.map((w) => w.plCat))).toEqual(
+      new Set(['電纜', '電線', 'RSG', 'EMT', 'PVC', '不鏽鋼管', '鍍鋅鋼管']),
+    );
+    expect(pl.every((w) => (w.listPrice ?? 0) > 0)).toBe(true);
   });
   it('參數預設值正確', () => {
     expect(master.defaults.wage).toBe(4475);

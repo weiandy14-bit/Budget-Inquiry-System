@@ -72,6 +72,8 @@ interface AppState {
   setSystemTier: (sysKey: string, tier: Tier) => void;
   setDerivedRatio: (name: string, ratio: number) => void;
   setMatOverride: (code: string, price: number | null) => void;
+  /** 折數拉霸：對某管線材料細類的所有牌價項，以 pct%（1~500）× 牌價取整數寫入本案參考價。 */
+  applyListPriceDiscount: (plCat: string, pct: number) => void;
   addLine: (sysKey: string, code?: string) => void;
   /** 在指定列之後插入一列空白明細（afterLineId 查無則附加於末尾）。 */
   insertLineAfter: (sysKey: string, afterLineId: string, code?: string) => void;
@@ -249,6 +251,20 @@ export const useAppStore = create<AppState>((set, get) => ({
       const matOverride = { ...c.matOverride };
       if (price === null || Number.isNaN(price)) delete matOverride[code];
       else matOverride[code] = price;
+      return { ...c, matOverride };
+    });
+  },
+
+  applyListPriceDiscount(plCat, pct) {
+    const master = get().master;
+    if (!master) return;
+    mutate(set, (c) => {
+      const matOverride = { ...c.matOverride };
+      for (const w of master.workItems) {
+        if (w.plCat === plCat && (w.listPrice ?? 0) > 0) {
+          matOverride[w.code] = Math.round((w.listPrice as number) * (pct / 100));
+        }
+      }
       return { ...c, matOverride };
     });
   },

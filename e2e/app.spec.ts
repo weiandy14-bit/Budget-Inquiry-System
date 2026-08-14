@@ -47,8 +47,9 @@ test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ pa
 test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備基礎座', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '材料主檔' }).click();
-  // 預設「管線材料」子頁，含預載清單
-  await expect(page.getByText('RSG厚鋼導線管CNS2606')).toBeVisible();
+  // 預設「管線材料」子頁，含預載清單（RSG 管）與折數拉霸
+  await expect(page.getByText('RSG管').first()).toBeVisible();
+  await expect(page.getByText('折數拉霸（牌價 × 折數 → 取整數 → 本案參考價）')).toBeVisible();
   // 切到「其他附屬材料」→ 設備基礎座
   await page.locator('.sys-switch .tab', { hasText: '其他附屬材料' }).click();
   await expect(page.getByText('設備基礎座')).toBeVisible();
