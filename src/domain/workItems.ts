@@ -45,6 +45,11 @@ export function materialSubtabOf(w: WorkItem): MatCategory | null {
   return null;
 }
 
+/** 設備器材的系統別（供「設備器材」子頁再分類）。未明設時：火警種子(sys=F)→消防，其餘→其他。 */
+export function eqSystemOf(w: WorkItem): string {
+  return w.eqSys ?? (w.sys === 'F' ? '消防' : '其他');
+}
+
 /** 工項顯示排序鍵：自訂項 order 優先，否則以其在主檔陣列的索引為序（種子維持原序）。 */
 export function orderKeyOf(w: WorkItem, indexInMaster: number): number {
   return w.order ?? indexInMaster;
@@ -81,6 +86,7 @@ export interface CustomItemOpts {
   grp?: CostGroup;
   matCat?: MatCategory;
   unit?: string;
+  eqSys?: string;
 }
 
 /**
@@ -105,6 +111,7 @@ export function buildCustomWorkItem(code: string, name: string, opts: CustomItem
     rule: '—',
     refPrice: 0,
     matCat: opts.matCat,
+    eqSys: opts.eqSys,
     custom: true,
   };
 }

@@ -4,6 +4,7 @@ import { loadMasterData } from './seed';
 import {
   appendOrder,
   buildCustomWorkItem,
+  eqSystemOf,
   findWorkItemByName,
   insertOrderAfter,
   matCategoryOf,
@@ -95,6 +96,15 @@ describe('materialSubtabOf（材料主檔只列型錄材料）', () => {
       (w) => (w.grp === '管材' || w.grp === '電線') && !w.matCat,
     )!;
     expect(materialSubtabOf(fire)).toBeNull();
+  });
+});
+
+describe('eqSystemOf（設備器材系統別）', () => {
+  it('火警種子設備→消防；明設 eqSys 優先', () => {
+    const fireEq = master.workItems.find((w) => w.grp === '設備' && w.sys === 'F')!;
+    expect(eqSystemOf(fireEq)).toBe('消防');
+    const w = buildCustomWorkItem('U-9', 'X', { grp: '設備', matCat: '設備器材', eqSys: '電力' });
+    expect(eqSystemOf(w)).toBe('電力');
   });
 });
 

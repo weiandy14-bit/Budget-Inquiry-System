@@ -8,10 +8,10 @@ import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { money } from '../format';
 import { downloadText, pickTextFile } from '../download';
-import { materialSubtabOf, orderedWorkItems } from '../../domain/workItems';
+import { eqSystemOf, materialSubtabOf, orderedWorkItems } from '../../domain/workItems';
 import { imTypeOf } from '../../domain/inchMeter';
 import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
-import { MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
+import { EQ_SYSTEMS, MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
 
 // 各子頁新增自訂材料時的預設群組／單位。
 const NEW_DEFAULTS: Record<MatCategory, { grp: CostGroup; unit: string }> = {
@@ -31,6 +31,7 @@ export function MaterialMasterTab() {
   const importMaterials = useAppStore((s) => s.importMaterials);
   const applyListPriceDiscount = useAppStore((s) => s.applyListPriceDiscount);
   const [cat, setCat] = useState<MatCategory>('管線材料');
+  const [eqSub, setEqSub] = useState<string>('消防'); // 設備器材子頁的系統別
   const [q, setQ] = useState('');
   const [importMsg, setImportMsg] = useState('');
   const [discPct, setDiscPct] = useState<Record<string, number>>({});
@@ -54,18 +55,28 @@ export function MaterialMasterTab() {
     return c;
   }, [master]);
 
+  // 設備器材各系統別筆數（供第二層子頁標籤）。
+  const eqCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const w of master?.workItems ?? []) {
+      if (materialSubtabOf(w) === '設備器材') c[eqSystemOf(w)] = (c[eqSystemOf(w)] ?? 0) + 1;
+    }
+    return c;
+  }, [master]);
+
   const items = useMemo(() => {
     const kw = q.trim().toLowerCase();
     return orderedWorkItems(
       master?.workItems ?? [],
       (w) =>
         materialSubtabOf(w) === cat &&
+        (cat !== '設備器材' || eqSystemOf(w) === eqSub) &&
         (!kw ||
           w.code.toLowerCase().includes(kw) ||
           w.name.toLowerCase().includes(kw) ||
           w.spec.toLowerCase().includes(kw)),
     );
-  }, [master, cat, q]);
+  }, [master, cat, eqSub, q]);
 
   // 管線材料的細類（電纜/電線/RSG/EMT/PVC/不鏽鋼管/鍍鋅鋼管），依出現序，供折數拉霸分組。
   const plCats = useMemo(() => {
@@ -93,6 +104,17 @@ export function MaterialMasterTab() {
         ))}
       </div>
 
+      {/* 設備器材第二層：系統別 */}
+      {cat === '設備器材' && (
+        <div className="sys-switch" style={{ marginTop: 6 }}>
+          {EQ_SYSTEMS.map((e) => (
+            <div key={e} className={`tab ${eqSub === e ? 'active' : ''}`} onClick={() => setEqSub(e)}>
+              {e}（{eqCounts[e] ?? 0}）
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="row" style={{ margin: '12px 0' }}>
         <input
           placeholder="搜尋工項碼 / 名稱 / 規格"
@@ -103,9 +125,15 @@ export function MaterialMasterTab() {
         <span className="muted">共 {items.length} 項</span>
         <button
           className="primary"
-          onClick={() => createWorkItem('新材料', { matCat: cat, ...NEW_DEFAULTS[cat] })}
+          onClick={() =>
+            createWorkItem(cat === '設備器材' ? '新設備' : '新材料', {
+              matCat: cat,
+              ...NEW_DEFAULTS[cat],
+              ...(cat === '設備器材' ? { eqSys: eqSub } : {}),
+            })
+          }
         >
-          ＋ 新增{cat}
+          ＋ 新增{cat === '設備器材' ? `${eqSub}設備` : cat}
         </button>
         <button onClick={handleImport}>匯入 CSV</button>
         <button

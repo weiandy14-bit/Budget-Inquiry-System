@@ -17,6 +17,9 @@ export type BaseGroup = CostGroup | '實體';
 export type MatCategory = '管線材料' | '設備器材' | '其他附屬材料';
 export const MAT_CATEGORIES: MatCategory[] = ['管線材料', '設備器材', '其他附屬材料'];
 
+// 「設備器材」子頁再依系統別拆分（純顯示，避免單頁太長難選）。
+export const EQ_SYSTEMS: string[] = ['電力', '弱電', '給排水', '消防', '空調', '通風', '其他'];
+
 // ─── 工率檔位 ────────────────────────────────────────────────
 // 三檔工率：最高 / 普通 / 最低。內部一律用此三個字面值，與 seed 資料一致。
 export type Tier = '最高' | '普通' | '最低';
@@ -55,6 +58,8 @@ export interface WorkItem {
   listPrice?: number;
   /** 管線材料細類（電纜/電線/RSG/EMT/PVC/不鏽鋼管/鍍鋅鋼管），供折數拉霸分組。 */
   plCat?: string;
+  /** 設備器材系統別（電力/弱電/給排水/消防/空調/通風/其他）；未設定時依系統碼推導（見 eqSystemOf）。純顯示。 */
+  eqSys?: string;
   /**
    * 是否為使用者新增的自訂工項（非 seed 種子）。
    * true = 使用者在明細表打名稱時「查無 → 自動建碼」產生，持久化於 IndexedDB、跨案共用、可編輯/刪除；
