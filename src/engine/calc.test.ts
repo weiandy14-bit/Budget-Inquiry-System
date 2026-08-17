@@ -31,6 +31,9 @@ describe('種子資料載入', () => {
       new Set(['電纜', '電線', 'RSG', 'EMT', 'PVC', '不鏽鋼管', '鍍鋅鋼管']),
     );
     expect(pl.every((w) => (w.listPrice ?? 0) > 0)).toBe(true);
+    // 工率已由 Excel 補上（少數來源無工率者仍為 0）
+    expect(pl.filter((w) => w.rateMid > 0).length).toBe(169);
+    expect(pl.every((w) => w.rateHi === w.rateMid && w.rateMid === w.rateLo)).toBe(true);
   });
   it('參數預設值正確', () => {
     expect(master.defaults.wage).toBe(4475);
