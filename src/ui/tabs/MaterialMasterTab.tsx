@@ -173,7 +173,7 @@ export function MaterialMasterTab() {
               <th>群組</th>
               {showImType && <th>吋米種類</th>}
               {showImType && <th>牌價</th>}
-              <th>全域參考價</th>
+              {!showImType && <th>全域參考價</th>}
               <th>本案參考價</th>
               <th></th>
             </tr>
@@ -250,24 +250,26 @@ export function MaterialMasterTab() {
                     )}
                   </td>
                 )}
-                <td>
-                  {w.custom ? (
-                    <input
-                      className="input-cell mono"
-                      type="number"
-                      style={{ width: 100 }}
-                      placeholder="全域參考價"
-                      value={w.refPrice || ''}
-                      onChange={(e) =>
-                        updateWorkItem(w.code, {
-                          refPrice: e.target.value === '' ? 0 : Number(e.target.value),
-                        })
-                      }
-                    />
-                  ) : (
-                    <span className="mono muted">{w.refPrice ? money(w.refPrice) : '—'}</span>
-                  )}
-                </td>
+                {!showImType && (
+                  <td>
+                    {w.custom ? (
+                      <input
+                        className="input-cell mono"
+                        type="number"
+                        style={{ width: 100 }}
+                        placeholder="全域參考價"
+                        value={w.refPrice || ''}
+                        onChange={(e) =>
+                          updateWorkItem(w.code, {
+                            refPrice: e.target.value === '' ? 0 : Number(e.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      <span className="mono muted">{w.refPrice ? money(w.refPrice) : '—'}</span>
+                    )}
+                  </td>
+                )}
                 <td>
                   <input
                     className="input-cell mono"
@@ -298,7 +300,7 @@ export function MaterialMasterTab() {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={showImType ? 10 : 8} className="l muted">
+                <td colSpan={showImType ? 9 : 8} className="l muted">
                   此分類尚無材料，點「＋ 新增{cat}」開始，或匯入既有清單。
                 </td>
               </tr>
