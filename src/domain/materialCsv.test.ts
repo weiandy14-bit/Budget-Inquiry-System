@@ -52,9 +52,41 @@ describe('parseMaterialCsv', () => {
     expect(errors[0]).toContain('名稱');
   });
 
-  it('內建範本可被完整解析（3 列）', () => {
+  it('內建範本可被完整解析（4 列）', () => {
     const { items, errors } = parseMaterialCsv(MATERIAL_CSV_TEMPLATE, { matCat: '管線材料' });
     expect(errors).toHaveLength(0);
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
+  });
+
+  it('進階欄位：牌價/三檔工率/吋米種類/設備系統別', () => {
+    const csv =
+      '名稱,規格,單位,群組,分類,參考價,牌價,工率_最高,工率_普通,工率_最低,吋米種類,設備系統別\n' +
+      'RSG管,25mm,M,管材,管線材料,,180,0.12,0.1,0.085,RSG管,\n';
+    const { items, errors } = parseMaterialCsv(csv, { matCat: '管線材料' });
+    expect(errors).toHaveLength(0);
+    expect(items[0]).toMatchObject({
+      name: 'RSG管',
+      listPrice: 180,
+      rateHi: 0.12,
+      rateMid: 0.1,
+      rateLo: 0.085,
+      imType: 'RSG管',
+    });
+  });
+
+  it('單一「工率」欄對應普通檔；未提供進階欄位為 undefined', () => {
+    const csv = '名稱,工率\nX 材料,0.05\n';
+    const { items } = parseMaterialCsv(csv, { matCat: '管線材料' });
+    expect(items[0].rateMid).toBe(0.05);
+    expect(items[0].rateHi).toBeUndefined();
+    expect(items[0].listPrice).toBeUndefined();
+    expect(items[0].imType).toBeUndefined();
+  });
+
+  it('設備系統別欄帶入 eqSys', () => {
+    const csv = '名稱,分類,設備系統別\n受信總機,設備器材,消防\n';
+    const { items } = parseMaterialCsv(csv, { matCat: '設備器材' });
+    expect(items[0].eqSys).toBe('消防');
+    expect(items[0].matCat).toBe('設備器材');
   });
 });
