@@ -407,8 +407,20 @@ export const useAppStore = create<AppState>((set, get) => ({
         grp: r.grp,
         matCat: r.matCat,
         unit: r.unit,
+        eqSys: r.eqSys,
       });
-      await masters.saveWorkItem({ ...base, spec: r.spec, refPrice: r.refPrice, order: ord });
+      await masters.saveWorkItem({
+        ...base,
+        spec: r.spec,
+        refPrice: r.refPrice,
+        order: ord,
+        // 進階欄位：有值才覆寫（未提供時維持 buildCustomWorkItem 的預設）
+        ...(r.listPrice !== undefined ? { listPrice: r.listPrice } : {}),
+        ...(r.rateHi !== undefined ? { rateHi: r.rateHi } : {}),
+        ...(r.rateMid !== undefined ? { rateMid: r.rateMid } : {}),
+        ...(r.rateLo !== undefined ? { rateLo: r.rateLo } : {}),
+        ...(r.imType !== undefined ? { imType: r.imType } : {}),
+      });
       ord += 1;
     }
     set({ master: await masters.load() }); // 全部寫入後重載一次
