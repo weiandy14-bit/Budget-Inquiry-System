@@ -40,6 +40,7 @@ export function RateMasterTab() {
           w.code.toLowerCase().includes(kw) ||
           w.name.toLowerCase().includes(kw) ||
           w.spec.toLowerCase().includes(kw) ||
+          w.lay.toLowerCase().includes(kw) ||
           w.sub.toLowerCase().includes(kw)),
     );
   }, [master, group, q]);
@@ -81,6 +82,7 @@ export function RateMasterTab() {
               <th className="l">工項碼</th>
               <th className="l">名稱</th>
               <th className="l">規格</th>
+              <th>敷設</th>
               <th>單位</th>
               <th>群組</th>
               <th>數量規則</th>
@@ -110,6 +112,15 @@ export function RateMasterTab() {
                       placeholder="規格"
                       value={w.spec}
                       onChange={(e) => updateWorkItem(w.code, { spec: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="input-cell"
+                      style={{ width: 56 }}
+                      placeholder="明管/暗管"
+                      value={w.lay}
+                      onChange={(e) => updateWorkItem(w.code, { lay: e.target.value })}
                     />
                   </td>
                   <td>
@@ -178,6 +189,7 @@ export function RateMasterTab() {
                   <td className="l mono">{w.code}</td>
                   <td className="l">{w.name}</td>
                   <td className="l muted">{w.spec}</td>
+                  <td className="muted">{w.lay}</td>
                   <td>{w.unit}</td>
                   <td style={{ background: groupColor(w.grp) }}>{w.grp}</td>
                   <td className="mono muted">{w.rule}</td>
@@ -195,7 +207,7 @@ export function RateMasterTab() {
             )}
             {items.length === 0 && (
               <tr>
-                <td colSpan={10} className="muted" style={{ textAlign: 'center', padding: 20 }}>
+                <td colSpan={11} className="muted" style={{ textAlign: 'center', padding: 20 }}>
                   此分頁尚無工項，點「＋ 新增自訂工項」開始。
                 </td>
               </tr>
