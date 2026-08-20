@@ -73,17 +73,21 @@ test('工率主檔子頁：大宗材料(管線材) 與 消防設備 分頁切換
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '工率主檔' }).click();
 
-  // 六個子頁標籤都在
-  for (const t of ['大宗材料(管線材)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備']) {
+  // 七個子頁標籤都在（大宗材料再拆明管主頁 + 暗管頁）
+  for (const t of ['大宗材料(管線材)', '大宗材料 管材(暗管)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備']) {
     await expect(page.locator('.sys-switch .tab', { hasText: t })).toBeVisible();
   }
 
-  // 預設「大宗材料(管線材)」子頁含配管配線工項（EMT）
+  // 預設「大宗材料(管線材)」子頁：含明管、無暗管（範圍限表格，避開分頁標籤文字）
   await expect(page.getByText('RSG管').first()).toBeVisible();
-  // 敷設欄區分明管/暗管（EMT 同規格 明/暗管非重複）
   await expect(page.getByRole('columnheader', { name: '敷設' })).toBeVisible();
-  await expect(page.getByText('明管').first()).toBeVisible();
-  await expect(page.getByText('暗管').first()).toBeVisible();
+  await expect(page.locator('table tbody').getByText('明管').first()).toBeVisible();
+  await expect(page.locator('table tbody').getByText('暗管')).toHaveCount(0);
+
+  // 切到「大宗材料 管材(暗管)」→ 只有暗管
+  await page.locator('.sys-switch .tab', { hasText: '大宗材料 管材(暗管)' }).click();
+  await expect(page.locator('table tbody').getByText('暗管').first()).toBeVisible();
+  await expect(page.locator('table tbody').getByText('明管')).toHaveCount(0);
 
   // 切到「消防設備」→ 顯示火警設備工項（火警綜合盤）
   await page.locator('.sys-switch .tab', { hasText: '消防設備' }).click();

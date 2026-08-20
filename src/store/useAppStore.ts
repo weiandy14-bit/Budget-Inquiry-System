@@ -359,7 +359,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const afterItem = master.workItems.find((w) => w.code === afterCode);
     // 預設沿用上一列的群組／分類／單位，讓插入的列與鄰列同性質。
     const base: CustomItemOpts = afterItem
-      ? { grp: afterItem.grp, matCat: matCategoryOf(afterItem), unit: afterItem.unit }
+      ? { grp: afterItem.grp, matCat: matCategoryOf(afterItem), unit: afterItem.unit, lay: afterItem.lay }
       : {};
     const cat = opts?.matCat ?? base.matCat ?? '管線材料';
     const code = nextCustomCode(master.workItems);

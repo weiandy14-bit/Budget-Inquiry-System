@@ -113,15 +113,22 @@ describe('eqSystemOf（設備器材系統別）', () => {
 });
 
 describe('rateGroupOf（工率主檔子頁分類）', () => {
-  it('管線材料/其他附屬材料/配管配線 → 大宗材料；火警設備 → 消防設備', () => {
+  it('管線材料/其他附屬材料/非暗管配管配線 → 大宗材料；火警設備 → 消防設備', () => {
     const pl = master.workItems.find((w) => w.matCat === '管線材料')!;
     expect(rateGroupOf(pl)).toBe('大宗材料');
     const aux = master.workItems.find((w) => w.matCat === '其他附屬材料')!;
     expect(rateGroupOf(aux)).toBe('大宗材料');
-    const pipe = master.workItems.find((w) => (w.grp === '管材' || w.grp === '電線') && !w.matCat)!;
+    const pipe = master.workItems.find((w) => w.grp === '管材' && !w.matCat && w.lay !== '暗管')!;
     expect(rateGroupOf(pipe)).toBe('大宗材料');
     const fireEq = master.workItems.find((w) => w.grp === '設備' && w.sys === 'F')!;
     expect(rateGroupOf(fireEq)).toBe('消防設備');
+  });
+
+  it('暗管管材 → 大宗材料暗管（明管留主頁）', () => {
+    const dark = master.workItems.find((w) => w.grp === '管材' && w.lay === '暗管')!;
+    expect(rateGroupOf(dark)).toBe('大宗材料暗管');
+    const light = master.workItems.find((w) => w.grp === '管材' && w.lay === '明管')!;
+    expect(rateGroupOf(light)).toBe('大宗材料');
   });
 
   it('設備系統別對應：電力/弱電→電力電信設備、給排水/空調/通風各自一頁', () => {
@@ -135,7 +142,7 @@ describe('rateGroupOf（工率主檔子頁分類）', () => {
     expect(mk('其他')).toBe('電力電信設備'); // 未知/其他 → 一般電力電信頁
   });
 
-  it('每筆工項都落在六個子頁其一（分類完備）', () => {
+  it('每筆工項都落在七個子頁其一（分類完備）', () => {
     const total = RATE_GROUPS.reduce(
       (s, g) => s + master.workItems.filter((w) => rateGroupOf(w) === g).length,
       0,
