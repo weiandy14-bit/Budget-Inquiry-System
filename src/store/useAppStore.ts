@@ -19,6 +19,7 @@ import {
   findWorkItemByName,
   insertOrderAfter,
   matCategoryOf,
+  materialKey,
   nextCustomCode,
   type CustomItemOpts,
 } from '../domain/workItems';
@@ -91,8 +92,10 @@ interface AppState {
   updateWorkItem: (code: string, patch: Partial<WorkItem>) => Promise<void>;
   /** 刪除一筆自訂工項（種子工項不可刪，會被忽略）。 */
   deleteWorkItem: (code: string) => Promise<void>;
-  /** 批次匯入材料（CSV 解析後的列），各配自訂碼寫入主檔並重載；回傳匯入筆數。 */
+  /** 批次匯入材料（CSV 解析後的列），各配自訂碼寫入主檔並重載；回傳「實際新增」筆數（略過重複）。 */
   importMaterials: (rows: ParsedMaterial[]) => Promise<number>;
+  /** 清除重複材料：同（名稱＋規格）僅保留一筆（種子優先、其次最早自訂項），刪除其餘自訂重複項；回傳刪除筆數。 */
+  dedupeMaterials: () => Promise<number>;
   /**
    * 明細表「打名稱→自動建碼」：
    * 依名稱解析既有工項並設定該列 code；查無則自動新增自訂工項再指派。
@@ -390,6 +393,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const master = get().master;
     if (!master || rows.length === 0) return 0;
     const used = new Set(master.workItems.map((w) => w.code));
+    // 去重：已存在（名稱＋規格）者不再匯入；批次內同鍵也只留第一筆。
+    const seen = new Set(master.workItems.map((w) => materialKey(w.name, w.spec)));
     let n = 1;
     const nextCode = () => {
       let c = `U-${String(n).padStart(4, '0')}`;
@@ -402,7 +407,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       return c;
     };
     let ord = appendOrder(master.workItems);
+    let added = 0;
     for (const r of rows) {
+      const key = materialKey(r.name, r.spec);
+      if (seen.has(key)) continue; // 略過重複品項
+      seen.add(key);
       const base = buildCustomWorkItem(nextCode(), r.name, {
         grp: r.grp,
         matCat: r.matCat,
@@ -422,9 +431,33 @@ export const useAppStore = create<AppState>((set, get) => ({
         ...(r.imType !== undefined ? { imType: r.imType } : {}),
       });
       ord += 1;
+      added += 1;
     }
     set({ master: await masters.load() }); // 全部寫入後重載一次
-    return rows.length;
+    return added;
+  },
+
+  async dedupeMaterials() {
+    const { masters } = getRepositories();
+    const master = get().master;
+    if (!master) return 0;
+    // 同（名稱＋規格）視為重複；種子優先保留，其次保留最早出現的自訂項，其餘自訂項刪除。
+    // 種子不可刪，故若一組重複皆為種子則原樣保留（seed 目前無重複）。
+    const keep = new Map<string, WorkItem>();
+    const toDelete: string[] = [];
+    // 先掃種子，讓種子佔位；再掃自訂。
+    const ordered = [...master.workItems].sort((a, b) => Number(!!a.custom) - Number(!!b.custom));
+    for (const w of ordered) {
+      const key = materialKey(w.name, w.spec);
+      if (!keep.has(key)) {
+        keep.set(key, w);
+      } else if (w.custom) {
+        toDelete.push(w.code); // 只刪自訂重複項
+      }
+    }
+    for (const code of toDelete) await masters.deleteWorkItem(code);
+    if (toDelete.length) set({ master: await masters.load() });
+    return toDelete.length;
   },
 
   async assignLineByName(sysKey, lineId, name) {

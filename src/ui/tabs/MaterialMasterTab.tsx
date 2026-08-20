@@ -29,6 +29,7 @@ export function MaterialMasterTab() {
   const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
   const importMaterials = useAppStore((s) => s.importMaterials);
+  const dedupeMaterials = useAppStore((s) => s.dedupeMaterials);
   const applyListPriceDiscount = useAppStore((s) => s.applyListPriceDiscount);
   const [cat, setCat] = useState<MatCategory>('管線材料');
   const [eqSub, setEqSub] = useState<string>('消防'); // 設備器材子頁的系統別
@@ -41,7 +42,9 @@ export function MaterialMasterTab() {
     if (text == null) return;
     const { items, errors } = parseMaterialCsv(text, { matCat: cat });
     const n = items.length ? await importMaterials(items) : 0;
+    const dupSkipped = items.length - n;
     const parts = [`匯入 ${n} 筆`];
+    if (dupSkipped > 0) parts.push(`略過重複 ${dupSkipped} 筆`);
     if (errors.length) parts.push(`略過 ${errors.length} 列（${errors[0]}${errors.length > 1 ? '…' : ''}）`);
     setImportMsg(parts.join('；'));
   }
@@ -140,6 +143,15 @@ export function MaterialMasterTab() {
           onClick={() => downloadText('材料匯入範本.csv', MATERIAL_CSV_TEMPLATE, 'text/csv')}
         >
           下載範本
+        </button>
+        <button
+          title="同名稱＋規格僅保留一筆（種子優先、其次最早自訂項）"
+          onClick={async () => {
+            const n = await dedupeMaterials();
+            setImportMsg(n > 0 ? `已清除 ${n} 筆重複品項` : '無重複品項');
+          }}
+        >
+          清除重複
         </button>
       </div>
       {importMsg && (

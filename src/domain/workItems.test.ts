@@ -8,6 +8,7 @@ import {
   findWorkItemByName,
   insertOrderAfter,
   matCategoryOf,
+  materialKey,
   materialSubtabOf,
   newItemOptsForRateGroup,
   nextCustomCode,
@@ -148,6 +149,21 @@ describe('rateGroupOf（工率主檔子頁分類）', () => {
       const w = buildCustomWorkItem('U-1', 'x', opts);
       expect(rateGroupOf(w)).toBe(g);
     }
+  });
+});
+
+describe('materialKey（材料去重鍵）', () => {
+  it('名稱＋規格正規化：全形空白/多重空白/大小寫/頭尾空白視為同鍵', () => {
+    expect(materialKey('RSG管', '25mm')).toBe(materialKey('  rsg管 ', '25MM'));
+    expect(materialKey('PVC電線', '明　暗 管')).toBe(materialKey('PVC電線', '明 暗  管'));
+  });
+  it('規格不同 → 不同鍵（不同尺寸為不同品項）', () => {
+    expect(materialKey('鍍鋅鋼管', '25∮')).not.toBe(materialKey('鍍鋅鋼管', '32∮'));
+  });
+  it('種子 182 筆管線材料無重複鍵（名稱＋規格皆唯一）', () => {
+    const pl = master.workItems.filter((w) => w.matCat === '管線材料');
+    const keys = new Set(pl.map((w) => materialKey(w.name, w.spec)));
+    expect(keys.size).toBe(pl.length);
   });
 });
 
