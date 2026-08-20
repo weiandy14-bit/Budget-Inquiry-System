@@ -74,7 +74,7 @@ test('工率主檔子頁：大宗材料(管線材) 與 消防設備 分頁切換
   await page.locator('.tab', { hasText: '工率主檔' }).click();
 
   // 七個子頁標籤都在（大宗材料再拆明管主頁 + 暗管頁）
-  for (const t of ['大宗材料(管線材)', '大宗材料 管材(暗管)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備']) {
+  for (const t of ['大宗材料(管線材)', '大宗材料 管材(暗管)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備', '未分類']) {
     await expect(page.locator('.sys-switch .tab', { hasText: t })).toBeVisible();
   }
 
