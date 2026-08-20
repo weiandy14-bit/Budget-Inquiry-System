@@ -55,6 +55,28 @@ test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備�
   await expect(page.getByText('設備基礎座')).toBeVisible();
 });
 
+test('工率主檔子頁：大宗材料(管線材) 與 消防設備 分頁切換', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '工率主檔' }).click();
+
+  // 六個子頁標籤都在
+  for (const t of ['大宗材料(管線材)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備']) {
+    await expect(page.locator('.sys-switch .tab', { hasText: t })).toBeVisible();
+  }
+
+  // 預設「大宗材料(管線材)」子頁含配管配線工項（EMT）
+  await expect(page.getByText('RSG管').first()).toBeVisible();
+
+  // 切到「消防設備」→ 顯示火警設備工項（火警綜合盤）
+  await page.locator('.sys-switch .tab', { hasText: '消防設備' }).click();
+  await expect(page.getByText('火警綜合盤').first()).toBeVisible();
+
+  // 新增自訂工項落入當前分頁（自訂計數 0 → 1）
+  await expect(page.getByText(/自訂 0/)).toBeVisible();
+  await page.getByRole('button', { name: '＋ 新增自訂工項' }).click();
+  await expect(page.getByText(/自訂 1/)).toBeVisible();
+});
+
 test('大系統兩層導覽：消防 9 項子系統 + 電氣子系統結構', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();

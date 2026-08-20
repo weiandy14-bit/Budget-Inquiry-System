@@ -9,9 +9,12 @@ import {
   insertOrderAfter,
   matCategoryOf,
   materialSubtabOf,
+  newItemOptsForRateGroup,
   nextCustomCode,
   orderedWorkItems,
+  rateGroupOf,
 } from './workItems';
+import { RATE_GROUPS } from './types';
 
 const master = loadMasterData();
 
@@ -105,6 +108,46 @@ describe('eqSystemOf（設備器材系統別）', () => {
     expect(eqSystemOf(fireEq)).toBe('消防');
     const w = buildCustomWorkItem('U-9', 'X', { grp: '設備', matCat: '設備器材', eqSys: '電力' });
     expect(eqSystemOf(w)).toBe('電力');
+  });
+});
+
+describe('rateGroupOf（工率主檔子頁分類）', () => {
+  it('管線材料/其他附屬材料/配管配線 → 大宗材料；火警設備 → 消防設備', () => {
+    const pl = master.workItems.find((w) => w.matCat === '管線材料')!;
+    expect(rateGroupOf(pl)).toBe('大宗材料');
+    const aux = master.workItems.find((w) => w.matCat === '其他附屬材料')!;
+    expect(rateGroupOf(aux)).toBe('大宗材料');
+    const pipe = master.workItems.find((w) => (w.grp === '管材' || w.grp === '電線') && !w.matCat)!;
+    expect(rateGroupOf(pipe)).toBe('大宗材料');
+    const fireEq = master.workItems.find((w) => w.grp === '設備' && w.sys === 'F')!;
+    expect(rateGroupOf(fireEq)).toBe('消防設備');
+  });
+
+  it('設備系統別對應：電力/弱電→電力電信設備、給排水/空調/通風各自一頁', () => {
+    const mk = (eqSys: string) =>
+      rateGroupOf(buildCustomWorkItem('U-x', 'x', { grp: '設備', matCat: '設備器材', eqSys }));
+    expect(mk('電力')).toBe('電力電信設備');
+    expect(mk('弱電')).toBe('電力電信設備');
+    expect(mk('給排水')).toBe('給排水設備');
+    expect(mk('空調')).toBe('空調設備');
+    expect(mk('通風')).toBe('通風設備');
+    expect(mk('其他')).toBe('電力電信設備'); // 未知/其他 → 一般電力電信頁
+  });
+
+  it('每筆工項都落在六個子頁其一（分類完備）', () => {
+    const total = RATE_GROUPS.reduce(
+      (s, g) => s + master.workItems.filter((w) => rateGroupOf(w) === g).length,
+      0,
+    );
+    expect(total).toBe(master.workItems.length);
+  });
+
+  it('newItemOptsForRateGroup 產生的工項會落回該子頁', () => {
+    for (const g of RATE_GROUPS) {
+      const opts = newItemOptsForRateGroup(g);
+      const w = buildCustomWorkItem('U-1', 'x', opts);
+      expect(rateGroupOf(w)).toBe(g);
+    }
   });
 });
 

@@ -50,6 +50,34 @@ export function eqSystemOf(w: WorkItem): string {
   return w.eqSys ?? (w.sys === 'F' ? '消防' : '其他');
 }
 
+// 設備系統別 → 工率主檔子頁對照（電力/弱電併入「電力電信設備」）。
+const EQ_TO_RATE_GROUP: Record<string, string> = {
+  電力: '電力電信設備',
+  弱電: '電力電信設備',
+  給排水: '給排水設備',
+  消防: '消防設備',
+  空調: '空調設備',
+  通風: '通風設備',
+};
+
+/**
+ * 工率主檔子頁歸屬（大宗材料 / 五類設備系統）。
+ * 大宗材料＝管線材料 + 其他附屬材料 + 配管配線工項（grp 管材/電線）；
+ * 設備類依 eqSystemOf 對應到設備系統子頁（其他/未知 → 電力電信設備）。
+ */
+export function rateGroupOf(w: WorkItem): string {
+  if (w.matCat === '管線材料' || w.matCat === '其他附屬材料') return '大宗材料';
+  if (w.grp === '管材' || w.grp === '電線') return '大宗材料';
+  return EQ_TO_RATE_GROUP[eqSystemOf(w)] ?? '電力電信設備';
+}
+
+/** 於工率主檔某子頁「＋新增自訂工項」時，帶入使新工項落入該子頁的分類預設。 */
+export function newItemOptsForRateGroup(group: string): CustomItemOpts {
+  if (group === '大宗材料') return { grp: '管材', matCat: '管線材料', unit: 'M' };
+  const eqSys = Object.keys(EQ_TO_RATE_GROUP).find((k) => EQ_TO_RATE_GROUP[k] === group) ?? '電力';
+  return { grp: '設備', matCat: '設備器材', eqSys, unit: '式' };
+}
+
 /** 工項顯示排序鍵：自訂項 order 優先，否則以其在主檔陣列的索引為序（種子維持原序）。 */
 export function orderKeyOf(w: WorkItem, indexInMaster: number): number {
   return w.order ?? indexInMaster;
