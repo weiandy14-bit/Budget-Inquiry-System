@@ -417,6 +417,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         matCat: r.matCat,
         unit: r.unit,
         eqSys: r.eqSys,
+        lay: r.lay,
       });
       await masters.saveWorkItem({
         ...base,

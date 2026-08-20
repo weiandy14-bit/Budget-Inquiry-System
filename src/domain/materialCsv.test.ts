@@ -89,4 +89,11 @@ describe('parseMaterialCsv', () => {
     expect(items[0].eqSys).toBe('消防');
     expect(items[0].matCat).toBe('設備器材');
   });
+
+  it('敷設欄帶入 lay（明管/管內）', () => {
+    const csv = '名稱,群組,分類,敷設\nRSG管,管材,管線材料,明管\nPVC電線,電線,管線材料,管內\n';
+    const { items } = parseMaterialCsv(csv, { matCat: '管線材料' });
+    expect(items[0].lay).toBe('明管');
+    expect(items[1].lay).toBe('管內');
+  });
 });
