@@ -55,6 +55,20 @@ test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備�
   await expect(page.getByText('設備基礎座')).toBeVisible();
 });
 
+test('材料主檔「清除重複」：同名稱＋規格僅保留一筆', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '材料主檔' }).click();
+  // 管線材料子頁，新增兩筆同名（規格皆空）→ 形成重複
+  await page.getByRole('button', { name: '＋ 新增管線材料' }).click();
+  await page.getByRole('button', { name: '＋ 新增管線材料' }).click();
+  // 清除重複 → 保留一筆、刪除一筆
+  await page.getByRole('button', { name: '清除重複' }).click();
+  await expect(page.getByText('已清除 1 筆重複品項')).toBeVisible();
+  // 再按一次 → 已無重複
+  await page.getByRole('button', { name: '清除重複' }).click();
+  await expect(page.getByText('無重複品項')).toBeVisible();
+});
+
 test('工率主檔子頁：大宗材料(管線材) 與 消防設備 分頁切換', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '工率主檔' }).click();
