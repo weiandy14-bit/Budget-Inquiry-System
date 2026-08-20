@@ -24,6 +24,8 @@ export interface ParsedMaterial {
   imType?: string;
   /** 設備系統別（電力/弱電/給排水/消防/空調/通風/其他）。未提供時為 undefined。 */
   eqSys?: string;
+  /** 敷設（明管/暗管/管內/—）。管線材料用於工率主檔明管/暗管分頁。未提供時為 undefined。 */
+  lay?: string;
 }
 
 export interface ParseResult {
@@ -32,11 +34,11 @@ export interface ParseResult {
 }
 
 export const MATERIAL_CSV_TEMPLATE =
-  '名稱,規格,單位,群組,分類,參考價,牌價,工率_最高,工率_普通,工率_最低,吋米種類,設備系統別\n' +
-  'PVC電線,2.0mm²,M,電線,管線材料,,26,0.004,0.003,0.0025,,\n' +
-  'RSG鍍鋅厚鋼電導管,25mm,M,管材,管線材料,,180,0.12,0.1,0.085,RSG管,\n' +
-  '設備基礎座,,式,設備,其他附屬材料,0,,,,,,\n' +
-  '受信總機,R型 500點,台,設備,設備器材,0,,,,,,消防\n';
+  '名稱,規格,單位,群組,分類,敷設,參考價,牌價,工率_最高,工率_普通,工率_最低,吋米種類,設備系統別\n' +
+  'PVC電線,2.0mm²,M,電線,管線材料,管內,,26,0.004,0.003,0.0025,,\n' +
+  'RSG鍍鋅厚鋼電導管,25mm,M,管材,管線材料,明管,,180,0.12,0.1,0.085,RSG管,\n' +
+  '設備基礎座,,式,設備,其他附屬材料,,0,,,,,,\n' +
+  '受信總機,R型 500點,台,設備,設備器材,,0,,,,,,消防\n';
 
 const COST_GROUPS: CostGroup[] = ['設備', '管材', '電線'];
 const MAT_CATS: MatCategory[] = ['管線材料', '設備器材', '其他附屬材料'];
@@ -85,6 +87,8 @@ const HEADER_ALIASES: Record<string, string> = {
   系統別: 'eqSys',
   設備系統: 'eqSys',
   eqsys: 'eqSys',
+  敷設: 'lay',
+  lay: 'lay',
 };
 
 function splitCsvLine(line: string): string[] {
@@ -176,6 +180,7 @@ export function parseMaterialCsv(text: string, defaults: { matCat: MatCategory }
     const rateLo = parseNum(get('rateLo'));
     const imType = get('imType') || undefined;
     const eqSys = get('eqSys') || undefined;
+    const lay = get('lay') || undefined;
 
     items.push({
       name,
@@ -190,6 +195,7 @@ export function parseMaterialCsv(text: string, defaults: { matCat: MatCategory }
       rateLo,
       imType,
       eqSys,
+      lay,
     });
   }
 
