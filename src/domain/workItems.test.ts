@@ -139,6 +139,7 @@ describe('rateGroupOf（工率主檔子頁分類）', () => {
     expect(mk('給排水')).toBe('給排水設備');
     expect(mk('空調')).toBe('空調設備');
     expect(mk('通風')).toBe('通風設備');
+    expect(mk('未分類')).toBe('未分類'); // 外線器材/人手孔/路燈燈柱等
     expect(mk('其他')).toBe('電力電信設備'); // 未知/其他 → 一般電力電信頁
   });
 
