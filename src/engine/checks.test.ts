@@ -18,7 +18,7 @@ describe('runChecks（火警範例案）', () => {
   });
 
   it('管線長度與設備點數彙總正確', () => {
-    // 管材：F-11-022(10480)+F-11-002(7310)+F-11-004(510)=18300
+    // 管材：F-11-021(10480)+F-11-001(7310)+F-11-003(510)=18300（改明管）
     expect(checks.pipeMeters).toBe(18300);
     expect(checks.eqPoints).toBeGreaterThan(0);
   });
