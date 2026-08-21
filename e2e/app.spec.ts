@@ -69,23 +69,25 @@ test('材料主檔「清除重複」：同名稱＋規格僅保留一筆', async
   await expect(page.getByText('無重複品項')).toBeVisible();
 });
 
-test('工率主檔子頁：大宗材料(管線材) 與 消防設備 分頁切換', async ({ page }) => {
+test('工率主檔子頁：大宗材料 管材/線材 與 消防設備 分頁切換', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '工率主檔' }).click();
 
-  // 七個子頁標籤都在（大宗材料再拆明管主頁 + 暗管頁）
-  for (const t of ['大宗材料(管線材)', '大宗材料 管材(暗管)', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備', '未分類']) {
+  // 八個子頁標籤都在（大宗材料拆管材/線材，已無暗管頁）
+  for (const t of ['大宗材料 管材', '大宗材料 線材', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備', '未分類']) {
     await expect(page.locator('.sys-switch .tab', { hasText: t })).toBeVisible();
   }
+  await expect(page.locator('.sys-switch .tab', { hasText: '暗管' })).toHaveCount(0);
 
-  // 預設「大宗材料(管線材)」子頁含明管管材（RSG管），且已無「敷設」「數量規則」欄
+  // 預設「大宗材料 管材」子頁含管材（RSG管、EMT），且已無「敷設」「數量規則」欄
   await expect(page.getByText('RSG管').first()).toBeVisible();
+  await expect(page.getByText('EMT無牙導線鋼管').first()).toBeVisible();
   await expect(page.getByRole('columnheader', { name: '敷設' })).toHaveCount(0);
   await expect(page.getByRole('columnheader', { name: '數量規則' })).toHaveCount(0);
 
-  // 切到「大宗材料 管材(暗管)」→ 顯示暗管管材（EMT無牙導線鋼管）
-  await page.locator('.sys-switch .tab', { hasText: '大宗材料 管材(暗管)' }).click();
-  await expect(page.getByText('EMT無牙導線鋼管').first()).toBeVisible();
+  // 切到「大宗材料 線材」→ 顯示電線工項（PVC電線）
+  await page.locator('.sys-switch .tab', { hasText: '大宗材料 線材' }).click();
+  await expect(page.getByText('PVC電線').first()).toBeVisible();
 
   // 切到「消防設備」→ 顯示火警設備工項（火警綜合盤）
   await page.locator('.sys-switch .tab', { hasText: '消防設備' }).click();
