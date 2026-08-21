@@ -17,7 +17,7 @@ export function RateMasterTab() {
   const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
-  const [group, setGroup] = useState<string>('大宗材料');
+  const [group, setGroup] = useState<string>('大宗材料管材');
   const [q, setQ] = useState('');
 
   // 各子頁筆數（供分頁標籤）。
@@ -69,7 +69,7 @@ export function RateMasterTab() {
         <span className="muted">共 {items.length} 項（自訂 {customCount}）</span>
         <button
           className="primary"
-          onClick={() => createWorkItem(group === '大宗材料' ? '新材料' : '新設備', newItemOptsForRateGroup(group))}
+          onClick={() => createWorkItem(group.startsWith('大宗材料') ? '新材料' : '新設備', newItemOptsForRateGroup(group))}
         >
           ＋ 新增自訂工項
         </button>
@@ -201,7 +201,7 @@ export function RateMasterTab() {
         </table>
       </div>
       <p className="muted">
-        依「大宗材料(管線材)＋五類設備系統」分頁；新增的自訂工項會落入目前分頁。
+        依「大宗材料 管材／線材＋設備系統」分頁；新增的自訂工項會落入目前分頁。
         種子工項唯讀（工率來源：《水電工程估價實務》）。自訂工項可直接編輯欄位、按 × 刪除，
         跨案共用並存於本機。設備類工資不入單價，工率可留 0；管材/電線請補工率以計入單價。
       </p>
