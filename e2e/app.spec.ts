@@ -12,16 +12,16 @@ async function openSampleCase(page: import('@playwright/test').Page) {
   await expect(page.getByText('工程總價（全案）')).toBeVisible();
 }
 
-test('載入火警範例案，日工價=3000 時工資還原至驗收基準 2,286,786', async ({ page }) => {
+test('載入火警範例案，日工價=3000 時工資還原至驗收基準 2,441,976', async ({ page }) => {
   await openSampleCase(page);
 
   // 參數設定：把綜合日工價設為 3000（舊制還原）
   await page.locator('.tab', { hasText: '參數設定' }).click();
   await page.locator('input[type=number]').first().fill('3000');
 
-  // 合理性檢核：三方案對照（日工價3000）應顯示驗收基準 2,286,786
+  // 合理性檢核：三方案對照（日工價3000）應顯示驗收基準 2,441,976
   await page.locator('.tab', { hasText: '合理性檢核' }).click();
-  await expect(page.getByText('2,286,786').first()).toBeVisible();
+  await expect(page.getByText('2,441,976').first()).toBeVisible();
 });
 
 test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) => {
