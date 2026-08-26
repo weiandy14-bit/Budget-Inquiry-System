@@ -44,23 +44,28 @@ test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ pa
   await expect(page.getByText('配管另件含接線盒(戶外採不鏽鋼)').first()).toBeVisible();
 });
 
-test('材料主檔三子頁：管線材料預載 + 其他附屬材料含設備基礎座', async ({ page }) => {
+test('材料主檔分頁與工率主檔一致：大宗材料 管材（RSG＋折數拉霸＋設備基礎座）', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '材料主檔' }).click();
-  // 預設「管線材料」子頁，含預載清單（RSG 管）與折數拉霸
+  // 八個子頁標籤與工率主檔一致
+  for (const t of ['大宗材料 管材', '大宗材料 線材', '電力電信設備', '給排水設備', '消防設備', '空調設備', '通風設備', '未分類']) {
+    await expect(page.locator('.sys-switch .tab', { hasText: t })).toBeVisible();
+  }
+  // 預設「大宗材料 管材」頁：含 RSG管、折數拉霸，且設備基礎座(其他附屬材料)也歸此頁
   await expect(page.getByText('RSG管').first()).toBeVisible();
   await expect(page.getByText('折數拉霸（牌價 × 折數 → 取整數 → 本案參考價）')).toBeVisible();
-  // 切到「其他附屬材料」→ 設備基礎座
-  await page.locator('.sys-switch .tab', { hasText: '其他附屬材料' }).click();
   await expect(page.getByText('設備基礎座')).toBeVisible();
+  // 切到「消防設備」→ 火警設備（火警綜合盤）
+  await page.locator('.sys-switch .tab', { hasText: '消防設備' }).click();
+  await expect(page.getByText('火警綜合盤').first()).toBeVisible();
 });
 
 test('材料主檔「清除重複」：同名稱＋規格僅保留一筆', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '材料主檔' }).click();
-  // 管線材料子頁，新增兩筆同名（規格皆空）→ 形成重複
-  await page.getByRole('button', { name: '＋ 新增管線材料' }).click();
-  await page.getByRole('button', { name: '＋ 新增管線材料' }).click();
+  // 大宗材料 管材頁，新增兩筆同名（規格皆空）→ 形成重複
+  await page.getByRole('button', { name: '＋ 新增材料' }).click();
+  await page.getByRole('button', { name: '＋ 新增材料' }).click();
   // 清除重複 → 保留一筆、刪除一筆
   await page.getByRole('button', { name: '清除重複' }).click();
   await expect(page.getByText('已清除 1 筆重複品項')).toBeVisible();

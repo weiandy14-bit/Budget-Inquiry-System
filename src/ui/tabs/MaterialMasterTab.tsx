@@ -1,24 +1,29 @@
 /**
- * 材料主檔（規格 §5.5）：分三個子頁——管線材料 / 設備器材 / 其他附屬材料。
- * 分類依 matCategoryOf（顯示用，不影響計算費用群組）。
- * 種子材料唯讀（可設本案參考價）；自訂材料可改名稱／全域參考價／刪除，並可於各子頁「＋新增」。
+ * 材料主檔（規格 §5.5）：分頁與工率主檔一致——大宗材料 管材／線材＋五類設備系統＋未分類。
+ * 只列「型錄材料」（materialSubtabOf 非 null）；分頁歸屬用 rateGroupOf（與工率主檔同）。
+ * 大宗材料頁顯示牌價／吋米種類／折數拉霸；設備類頁顯示全域參考價。
+ * 種子材料唯讀（可設本案參考價）；自訂材料可改名稱／價／刪除，並可於各子頁「＋新增」。
  */
 import { useMemo, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groupColor } from '../theme';
 import { money } from '../format';
 import { downloadText, pickTextFile } from '../download';
-import { eqSystemOf, materialSubtabOf, orderedWorkItems } from '../../domain/workItems';
+import {
+  materialSubtabOf,
+  newItemOptsForRateGroup,
+  orderedWorkItems,
+  rateGroupOf,
+} from '../../domain/workItems';
 import { imTypeOf } from '../../domain/inchMeter';
 import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from '../../domain/materialCsv';
-import { EQ_SYSTEMS, MAT_CATEGORIES, type CostGroup, type MatCategory } from '../../domain/types';
+import { RATE_GROUPS, RATE_GROUP_LABELS, type MatCategory } from '../../domain/types';
 
-// 各子頁新增自訂材料時的預設群組／單位。
-const NEW_DEFAULTS: Record<MatCategory, { grp: CostGroup; unit: string }> = {
-  管線材料: { grp: '管材', unit: 'M' },
-  設備器材: { grp: '設備', unit: '式' },
-  其他附屬材料: { grp: '設備', unit: '式' },
-};
+/** 型錄材料（列入材料主檔者），且落在指定子頁。 */
+function inGroup(w: Parameters<typeof rateGroupOf>[0], group: string): boolean {
+  return materialSubtabOf(w) !== null && rateGroupOf(w) === group;
+}
+const isBulk = (g: string) => g === '大宗材料管材' || g === '大宗材料線材';
 
 export function MaterialMasterTab() {
   const master = useAppStore((s) => s.master);
@@ -31,16 +36,18 @@ export function MaterialMasterTab() {
   const importMaterials = useAppStore((s) => s.importMaterials);
   const dedupeMaterials = useAppStore((s) => s.dedupeMaterials);
   const applyListPriceDiscount = useAppStore((s) => s.applyListPriceDiscount);
-  const [cat, setCat] = useState<MatCategory>('管線材料');
-  const [eqSub, setEqSub] = useState<string>('消防'); // 設備器材子頁的系統別
+  const [group, setGroup] = useState<string>('大宗材料管材');
   const [q, setQ] = useState('');
   const [importMsg, setImportMsg] = useState('');
   const [discPct, setDiscPct] = useState<Record<string, number>>({});
 
+  // 匯入時的預設分類：大宗材料頁→管線材料，設備類頁→設備器材。
+  const importMatCat: MatCategory = isBulk(group) ? '管線材料' : '設備器材';
+
   async function handleImport() {
     const text = await pickTextFile('.csv');
     if (text == null) return;
-    const { items, errors } = parseMaterialCsv(text, { matCat: cat });
+    const { items, errors } = parseMaterialCsv(text, { matCat: importMatCat });
     const n = items.length ? await importMaterials(items) : 0;
     const dupSkipped = items.length - n;
     const parts = [`匯入 ${n} 筆`];
@@ -50,19 +57,11 @@ export function MaterialMasterTab() {
   }
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { 管線材料: 0, 設備器材: 0, 其他附屬材料: 0 };
-    for (const w of master?.workItems ?? []) {
-      const k = materialSubtabOf(w);
-      if (k) c[k]++;
-    }
-    return c;
-  }, [master]);
-
-  // 設備器材各系統別筆數（供第二層子頁標籤）。
-  const eqCounts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const w of master?.workItems ?? []) {
-      if (materialSubtabOf(w) === '設備器材') c[eqSystemOf(w)] = (c[eqSystemOf(w)] ?? 0) + 1;
+      if (materialSubtabOf(w) === null) continue;
+      const g = rateGroupOf(w);
+      c[g] = (c[g] ?? 0) + 1;
     }
     return c;
   }, [master]);
@@ -72,51 +71,40 @@ export function MaterialMasterTab() {
     return orderedWorkItems(
       master?.workItems ?? [],
       (w) =>
-        materialSubtabOf(w) === cat &&
-        (cat !== '設備器材' || eqSystemOf(w) === eqSub) &&
+        inGroup(w, group) &&
         (!kw ||
           w.code.toLowerCase().includes(kw) ||
           w.name.toLowerCase().includes(kw) ||
           w.spec.toLowerCase().includes(kw)),
     );
-  }, [master, cat, eqSub, q]);
+  }, [master, group, q]);
 
-  // 管線材料的細類（電纜/電線/RSG/EMT/PVC/不鏽鋼管/鍍鋅鋼管），依出現序，供折數拉霸分組。
+  // 目前大宗材料頁的細類（電纜/電線/RSG/EMT/PVC/不鏽鋼管/鍍鋅鋼管），供折數拉霸分組。
   const plCats = useMemo(() => {
     const seen: string[] = [];
     for (const w of master?.workItems ?? []) {
-      if (materialSubtabOf(w) === '管線材料' && w.plCat && !seen.includes(w.plCat)) seen.push(w.plCat);
+      if (inGroup(w, group) && w.plCat && !seen.includes(w.plCat)) seen.push(w.plCat);
     }
     return seen;
-  }, [master]);
+  }, [master, group]);
 
   if (!master || !current) return null;
-  const showImType = cat === '管線材料'; // 管線材料子頁顯示「吋米種類」「牌價」欄與折數拉霸
+  const showImType = isBulk(group); // 大宗材料頁顯示「吋米種類」「牌價」欄與折數拉霸
   const imTypes = master.inchMeterRates.map((r) => r.type);
+  const label = RATE_GROUP_LABELS[group] ?? group;
 
   return (
     <div className="card">
       <h2>材料主檔</h2>
 
-      {/* 子頁分類 */}
+      {/* 子頁分類（與工率主檔一致） */}
       <div className="sys-switch">
-        {MAT_CATEGORIES.map((c) => (
-          <div key={c} className={`tab ${cat === c ? 'active' : ''}`} onClick={() => setCat(c)}>
-            {c}（{counts[c] ?? 0}）
+        {RATE_GROUPS.map((g) => (
+          <div key={g} className={`tab ${group === g ? 'active' : ''}`} onClick={() => setGroup(g)}>
+            {RATE_GROUP_LABELS[g] ?? g}（{counts[g] ?? 0}）
           </div>
         ))}
       </div>
-
-      {/* 設備器材第二層：系統別 */}
-      {cat === '設備器材' && (
-        <div className="sys-switch" style={{ marginTop: 6 }}>
-          {EQ_SYSTEMS.map((e) => (
-            <div key={e} className={`tab ${eqSub === e ? 'active' : ''}`} onClick={() => setEqSub(e)}>
-              {e}（{eqCounts[e] ?? 0}）
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="row" style={{ margin: '12px 0' }}>
         <input
@@ -128,15 +116,9 @@ export function MaterialMasterTab() {
         <span className="muted">共 {items.length} 項</span>
         <button
           className="primary"
-          onClick={() =>
-            createWorkItem(cat === '設備器材' ? '新設備' : '新材料', {
-              matCat: cat,
-              ...NEW_DEFAULTS[cat],
-              ...(cat === '設備器材' ? { eqSys: eqSub } : {}),
-            })
-          }
+          onClick={() => createWorkItem(isBulk(group) ? '新材料' : '新設備', newItemOptsForRateGroup(group))}
         >
-          ＋ 新增{cat === '設備器材' ? `${eqSub}設備` : cat}
+          ＋ 新增{isBulk(group) ? '材料' : '設備'}
         </button>
         <button onClick={handleImport}>匯入 CSV</button>
         <button
@@ -341,7 +323,7 @@ export function MaterialMasterTab() {
             {items.length === 0 && (
               <tr>
                 <td colSpan={showImType ? 9 : 8} className="l muted">
-                  此分類尚無材料，點「＋ 新增{cat}」開始，或匯入既有清單。
+                  「{label}」尚無材料，點「＋ 新增{isBulk(group) ? '材料' : '設備'}」開始，或匯入既有清單。
                 </td>
               </tr>
             )}
@@ -349,8 +331,8 @@ export function MaterialMasterTab() {
         </table>
       </div>
       <p className="muted">
-        本案參考價只覆寫本案（寫入 case.matOverride），不動全域主檔。「設備器材」目前彙整消防系統設備；
-        管線材料與其他附屬材料已預載常見項目，皆可自行新增／刪除。
+        分頁與工率主檔一致。本案參考價只覆寫本案（寫入 case.matOverride），不動全域主檔。
+        大宗材料頁提供牌價／吋米種類／折數拉霸；設備類頁用全域參考價。皆可自行新增／刪除／匯入。
       </p>
     </div>
   );
