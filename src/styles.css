@@ -3,6 +3,8 @@
   color: #1a1a1a;
   background: #f5f6f8;
   font-size: 14px;
+  /* 本系統為固定淺色版面；強制表單控制項用淺色配色，避免瀏覽器深色模式把輸入字改成淺色而「看似空白」。 */
+  color-scheme: light;
 }
 * {
   box-sizing: border-box;
@@ -46,11 +48,14 @@ button.danger {
   border-color: #e2b6bd;
 }
 input,
-select {
+select,
+textarea {
   font: inherit;
   padding: 4px 6px;
   border: 1px solid #c3c8d0;
   border-radius: 4px;
+  color: #1a1a1a; /* 明確深色字：不隨瀏覽器深色模式變淺，確保輸入內容永遠可見 */
+  background: #fff;
 }
 input.input-cell {
   width: 100%;
