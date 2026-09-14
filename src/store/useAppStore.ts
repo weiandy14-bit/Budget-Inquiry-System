@@ -25,6 +25,7 @@ import {
 } from '../domain/workItems';
 import { indexMaster } from '../engine/calc';
 import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
+import { migrateCode } from '../domain/codeMigration';
 import type { ParsedMaterial } from '../domain/materialCsv';
 
 let lineSeq = 0;
@@ -37,13 +38,20 @@ function emptyLine(code = ''): LineItem {
   return { id: newLineId(), code, spec: '', qty: 0, workQty: null, tierManual: '', matPrice: null, disc: null, note: '' };
 }
 
-/** 回填舊案件缺少的後加欄位（例：spec），確保載入後型別完整。 */
+/**
+ * 回填舊案件缺少的後加欄位（例：spec），並把明細列/本案覆寫價的舊工項碼遷移到現行碼
+ * （seed 碼歷經暗管移除、語意化重編；舊案件引用舊碼會對不到主檔而「不見」）。
+ */
 function normalizeCase(c: Case): Case {
   const systems: Case['systems'] = {};
   for (const [k, lines] of Object.entries(c.systems)) {
-    systems[k] = lines.map((l) => ({ ...l, spec: l.spec ?? '' }));
+    systems[k] = lines.map((l) => ({ ...l, spec: l.spec ?? '', code: migrateCode(l.code) }));
   }
-  return { ...c, systems };
+  const matOverride: Case['matOverride'] = {};
+  for (const [code, price] of Object.entries(c.matOverride ?? {})) {
+    matOverride[migrateCode(code)] = price;
+  }
+  return { ...c, systems, matOverride };
 }
 
 interface AppState {
