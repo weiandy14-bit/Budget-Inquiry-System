@@ -16,81 +16,76 @@ export const FIRE_BIG_KEY = 'fire-protection';
 
 type SubSpec = Omit<SubSystemDef, 'bigKey'>;
 
-// 消防系統工程的 9 個正式子系統。火警 key 維持 'fire' 以對應種子與火警範例案。
+// 消防系統工程 10 子系統（依「嘉義華泰名品城」標單）。火警 key 維持 'fire' 以對應種子與火警範例案。
 const FIRE_SUBS: SubSpec[] = [
-  { no: '1', name: '火警設備工程', key: 'fire', status: '工率齊全' },
-  { no: '2', name: '緊急廣播系統工程', key: 'broadcast', status: '待建' },
-  { no: '3', name: '消防栓及連結送水設備工程', key: 'hydrant', status: '待建' },
-  { no: '4', name: '採水系統設備工程', key: 'water-intake', status: '待建' },
-  { no: '5', name: '標示、避難器具設備工程', key: 'escape', status: '待建' },
-  { no: '6', name: '自動灑水系統設備工程', key: 'sprinkler', status: '待建' },
-  { no: '7', name: '泡沫滅火系統設備工程', key: 'foam', status: '待建' },
-  { no: '8', name: '排煙設備工程', key: 'smoke', status: '待建' },
-  { no: '9', name: '消防無線通訊輔助設備工程', key: 'radio', status: '待建' },
+  { no: '1', name: '火警自動警報設備工程', key: 'fire', status: '工率齊全' },
+  { no: '2', name: '緊急廣播設備工程', key: 'fp-02', status: '待建' },
+  { no: '3', name: '避難及標示設備工程', key: 'fp-03', status: '待建' },
+  { no: '4', name: '室內外消防栓及連結送水管及採水設備工程', key: 'fp-04', status: '待建' },
+  { no: '5', name: '自動撒水設備工程', key: 'fp-05', status: '待建' },
+  { no: '6', name: '移動式泡沫設備工程', key: 'fp-06', status: '待建' },
+  { no: '7', name: '緊急排煙設備工程', key: 'fp-07', status: '待建' },
+  { no: '8', name: '全自動氣體滅火設備工程', key: 'fp-08', status: '待建' },
+  { no: '9', name: '廚房簡易滅火設備工程', key: 'fp-09', status: '待建' },
+  { no: '10', name: '消防會勘費用（含文件製作、不含變更設計）', key: 'fp-10', status: '待建' },
 ];
 
-// 電氣設備工程 12 子系統（結構，工率待建）。
+// 電氣設備工程 13 子系統（依標單）。
 const ELEC_SUBS: SubSpec[] = [
-  { no: '1', name: '高壓配電盤設備工程', key: 'ele-01', status: '待建' },
-  { no: '2', name: '低壓分電盤設備工程', key: 'ele-02', status: '待建' },
-  { no: '3', name: '緊急發電機設備工程', key: 'ele-03', status: '待建' },
-  { no: '4', name: '匯流排設備工程', key: 'ele-04', status: '待建' },
-  { no: '5', name: '動力配管線工程', key: 'ele-05', status: '待建' },
-  { no: '6', name: '照明、開關、插座設備工程', key: 'ele-06', status: '待建' },
+  { no: '1', name: '高低壓配電盤設備工程', key: 'ele-01', status: '待建' },
+  { no: '2', name: '緊急發電機設備工程', key: 'ele-02', status: '待建' },
+  { no: '3', name: '照明燈具、插座設備工程', key: 'ele-03', status: '待建' },
+  { no: '4', name: '二線式智慧型燈光控制工程', key: 'ele-04', status: '待建' },
+  { no: '5', name: '匯流排槽設備工程', key: 'ele-05', status: '待建' },
+  { no: '6', name: '動力配管線工程', key: 'ele-06', status: '待建' },
   { no: '7', name: '鋁製電纜線架工程', key: 'ele-07', status: '待建' },
   { no: '8', name: '電動車充電設備工程', key: 'ele-08', status: '待建' },
-  { no: '9', name: '二線式控制設備工程', key: 'ele-09', status: '待建' },
-  { no: '10', name: 'FUPS系統式蓄電池組設備工程(消防用)', key: 'ele-10', status: '待建' },
-  { no: '11', name: 'SCADA電力監控工程', key: 'ele-11', status: '待建' },
-  { no: '12', name: '報竣前變更及送電申請(含技師簽證費)', key: 'ele-12', status: '待建' },
+  { no: '9', name: '太陽能發電設備工程(廠商責任施工)', key: 'ele-09', status: '待建' },
+  { no: '10', name: '景觀照明設備工程', key: 'ele-10', status: '待建' },
+  { no: '11', name: '接地設備工程', key: 'ele-11', status: '待建' },
+  { no: '12', name: '防火區劃貫穿處防火阻絕填塞工程', key: 'ele-12', status: '待建' },
+  { no: '13', name: '報竣前變更及電機技師簽證費(含送臨時電)', key: 'ele-13', status: '待建' },
 ];
 
-// 電信及弱電設備工程 8 子系統（結構，工率待建）。
+// 電信及弱電設備工程 10 子系統（依標單）。
 const TELECOM_SUBS: SubSpec[] = [
-  { no: '1', name: '電信及網路設備工程', key: 'tel-01', status: '待建' },
-  { no: '2', name: '共同天線設備工程', key: 'tel-02', status: '待建' },
-  { no: '3', name: '避雷及接地設備工程', key: 'tel-03', status: '待建' },
-  { no: '4', name: '鋁製電纜線槽工程', key: 'tel-04', status: '待建' },
-  { no: '5', name: '中央監控設備工程', key: 'tel-05', status: '待建' },
-  { no: '6', name: '安全監視、門禁及求救警報設備工程', key: 'tel-06', status: '待建' },
-  { no: '7', name: '停車場收費管制設備工程', key: 'tel-07', status: '待建' },
-  { no: '8', name: '行動通訊改善設備工程', key: 'tel-08', status: '待建' },
+  { no: '1', name: '電信設備及電信引進工程', key: 'tel-01', status: '待建' },
+  { no: '2', name: '光纖設備工程', key: 'tel-02', status: '待建' },
+  { no: '3', name: '電視共同天線設備工程', key: 'tel-03', status: '待建' },
+  { no: '4', name: '鋁製電纜線架工程', key: 'tel-04', status: '待建' },
+  { no: '5', name: '避雷及接地設備工程', key: 'tel-05', status: '待建' },
+  { no: '6', name: '中央監控設備工程', key: 'tel-06', status: '待建' },
+  { no: '7', name: '監視管理設備工程', key: 'tel-07', status: '待建' },
+  { no: '8', name: '門禁管理設備工程', key: 'tel-08', status: '待建' },
+  { no: '9', name: '停車管理設備工程', key: 'tel-09', status: '待建' },
+  { no: '10', name: 'AED設備', key: 'tel-10', status: '待建' },
 ];
 
-// 給排水設備工程 10 子系統（結構，工率待建）。
+// 給排水設備工程 9 子系統（依標單）。
 const PLUMBING_SUBS: SubSpec[] = [
-  { no: '1', name: '衛生器具設備工程', key: 'plu-01', status: '待建' },
-  { no: '2', name: 'FRP組合式水箱設備工程', key: 'plu-02', status: '待建' },
-  { no: '3', name: '給水設備工程', key: 'plu-03', status: '待建' },
-  { no: '4', name: '排水系統設備工程', key: 'plu-04', status: '待建' },
-  { no: '5', name: '雨水回收處理設備', key: 'plu-05', status: '待建' },
-  { no: '6', name: '油脂截留設備工程', key: 'plu-06', status: '待建' },
-  { no: '7', name: '污水處理場設備工程', key: 'plu-07', status: '待建' },
-  { no: '8', name: '熱水及鍋爐設備工程', key: 'plu-08', status: '待建' },
-  { no: '9', name: '垃圾廚餘冷藏工程', key: 'plu-09', status: '待建' },
-  { no: '10', name: '配合竣工自來水、污水、雨水送審作業費', key: 'plu-10', status: '待建' },
+  { no: '1', name: '給水衛生器具設備工程', key: 'plu-01', status: '待建' },
+  { no: '2', name: '給水設備工程', key: 'plu-02', status: '待建' },
+  { no: '3', name: '排水設備工程', key: 'plu-03', status: '待建' },
+  { no: '4', name: '組合式水箱設備工程', key: 'plu-04', status: '待建' },
+  { no: '5', name: '雨水回收處理設備工程', key: 'plu-05', status: '待建' },
+  { no: '6', name: '自來水前置過濾設備工程', key: 'plu-06', status: '待建' },
+  { no: '7', name: '油脂截留設備工程', key: 'plu-07', status: '待建' },
+  { no: '8', name: '垃圾儲藏設備工程', key: 'plu-08', status: '待建' },
+  { no: '9', name: '配合竣工給水、污排水系統送審作業費', key: 'plu-09', status: '待建' },
 ];
 
-// 空調通風設備工程 10 子系統（結構，工率待建）。
+// 空調通風設備工程 7 子系統（依標單）。
 const HVAC_SUBS: SubSpec[] = [
-  { no: '1', name: '機器設備', key: 'hvac-01', status: '待建' },
-  { no: '2', name: '機器設備基礎安裝及防震工程', key: 'hvac-02', status: '待建' },
-  { no: '3', name: 'VRF空調設備工程', key: 'hvac-03', status: '待建' },
-  { no: '4', name: '風管工程', key: 'hvac-04', status: '待建' },
-  { no: '5', name: '水管工程', key: 'hvac-05', status: '待建' },
-  { no: '6', name: '停車場通風設備工程', key: 'hvac-06', status: '待建' },
-  { no: '7', name: '空調監控及自動控制設備工程', key: 'hvac-07', status: '待建' },
-  { no: '8', name: '水處理設備工程', key: 'hvac-08', status: '待建' },
+  { no: '1', name: '機器設備工程', key: 'hvac-01', status: '待建' },
+  { no: '2', name: '機器設備基礎安裝防震工程', key: 'hvac-02', status: '待建' },
+  { no: '3', name: '風管工程', key: 'hvac-03', status: '待建' },
+  { no: '4', name: '水管工程', key: 'hvac-04', status: '待建' },
+  { no: '5', name: '自動控制工程', key: 'hvac-05', status: '待建' },
+  { no: '6', name: '變頻冷媒空調系統設備工程', key: 'hvac-06', status: '待建' },
   {
-    no: '9',
-    name: '空調系統測試、調整及平衡(含TAB及CX報告及第三公正單位簽證費)',
-    key: 'hvac-09',
-    status: '待建',
-  },
-  {
-    no: '10',
-    name: '配合綠建築、智慧建築、建築能效、申請竣工查驗費',
-    key: 'hvac-10',
+    no: '7',
+    name: '空調系統測試、TAB調整及平衡(含TAB及CX報告及第三公正單位簽證費)',
+    key: 'hvac-07',
     status: '待建',
   },
 ];
