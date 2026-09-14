@@ -104,16 +104,16 @@ test('工率主檔子頁：大宗材料 管材/線材 與 消防設備 分頁切
   await expect(page.getByText(/自訂 1/)).toBeVisible();
 });
 
-test('大系統兩層導覽：消防 9 項子系統 + 電氣子系統結構', async ({ page }) => {
+test('大系統兩層導覽：消防 10 項子系統 + 電氣 13 子系統結構（依標單）', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();
 
   // 消防為預設大系統，子系統含正式名稱（第一與最後一項）
-  await expect(page.getByText('火警設備工程')).toBeVisible();
-  await expect(page.getByText('消防無線通訊輔助設備工程')).toBeVisible();
+  await expect(page.getByText('火警自動警報設備工程')).toBeVisible();
+  await expect(page.getByText('消防會勘費用（含文件製作、不含變更設計）')).toBeVisible();
 
   // 切換到「電氣系統工程」→ 顯示其子系統結構（第一與最後一項）
   await page.locator('.big-switch .tab', { hasText: '電氣系統工程' }).click();
-  await expect(page.getByText('高壓配電盤設備工程')).toBeVisible();
-  await expect(page.getByText('報竣前變更及送電申請(含技師簽證費)')).toBeVisible();
+  await expect(page.getByText('高低壓配電盤設備工程')).toBeVisible();
+  await expect(page.getByText('報竣前變更及電機技師簽證費(含送臨時電)')).toBeVisible();
 });
