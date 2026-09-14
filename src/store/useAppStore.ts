@@ -11,7 +11,7 @@
 import { create } from 'zustand';
 import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier, WorkItem } from '../domain/types';
 import { getRepositories } from '../data';
-import { buildFireSampleCase } from '../domain/seed';
+import { buildFireSampleCase, buildHuataiSampleCase } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
 import {
   appendOrder,
@@ -238,6 +238,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!(await cases.exists('sample-fire'))) {
       await cases.save(buildFireSampleCase(master));
       await get().refreshList();
+    }
+    if (!(await cases.exists('sample-huatai'))) {
+      const huatai = buildHuataiSampleCase(master);
+      if (huatai) {
+        await cases.save(huatai);
+        await get().refreshList();
+      }
     }
   },
 

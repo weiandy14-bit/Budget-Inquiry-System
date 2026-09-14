@@ -3,9 +3,10 @@
  * 每次 `npm test` 都會跑；改 seed 後若有斷鏈會直接失敗，讓線上版更新前就攔下問題。
  */
 import { describe, expect, it } from 'vitest';
-import { loadMasterData, buildFireSampleCase } from './seed';
+import { loadMasterData, buildFireSampleCase, buildHuataiSampleCase } from './seed';
 import { rateGroupOf, materialKey } from './workItems';
 import { EQ_SYSTEMS, RATE_GROUPS } from './types';
+import { indexMaster, totalCalc } from '../engine/calc';
 
 const master = loadMasterData();
 
@@ -26,6 +27,30 @@ describe('系統整合性：連結不失效', () => {
     const lines = Object.values(c.systems).flat();
     const broken = lines.filter((l) => l.code && !codes.has(l.code)).map((l) => l.code);
     expect(broken).toEqual([]);
+  });
+
+  it('華泰名品城案每一列都連到存在的工項碼', () => {
+    const c = buildHuataiSampleCase(master)!;
+    const codes = new Set(master.workItems.map((w) => w.code));
+    const lines = Object.values(c.systems).flat();
+    const broken = lines.filter((l) => l.code && !codes.has(l.code)).map((l) => l.code);
+    expect(broken).toEqual([]);
+  });
+
+  it('華泰名品城案：五大系統皆有明細，總價落在合理量級（依標單）', () => {
+    const c = buildHuataiSampleCase(master)!;
+    const idx = indexMaster(master);
+    // 五大系統各至少有一個子系統帶明細
+    const bigHasLines = ['ele', 'tel', 'plu', 'fire', 'hvac'].map((p) =>
+      Object.entries(c.systems).some(
+        ([k, v]) => v.length > 0 && (p === 'fire' ? k === 'fire' || k.startsWith('fp') : k.startsWith(p)),
+      ),
+    );
+    expect(bigHasLines.every(Boolean)).toBe(true);
+    // 工程總價（工率×日工價即時計算）落在標單量級（6~9 億）。
+    const t = totalCalc(c, idx);
+    expect(t.grandSubtotal).toBeGreaterThan(600_000_000);
+    expect(t.grandSubtotal).toBeLessThan(900_000_000);
   });
 
   it('每個工項的數量規則都已定義（或為 —／設備哨兵 R-EQ-N）', () => {
