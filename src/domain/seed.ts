@@ -58,6 +58,16 @@ interface RawSeed {
     類別: string[];
     項目: { 管種: string; 系統: string; 價: number[] }[];
   };
+  華泰名品城案?: {
+    名稱: string;
+    業主?: string;
+    地點?: string;
+    編製人?: string;
+    日工價: number;
+    折數: number;
+    系統: Record<string, { 工項碼: string; 數量: number }[]>;
+    本案參考價: Record<string, number>;
+  };
 }
 
 const raw = seedJson as unknown as RawSeed;
@@ -185,6 +195,64 @@ export function buildFireSampleCase(master: MasterData): Case {
     derived,
     matOverride: {},
     systems: { fire: lines },
+    customSystems: [],
+  };
+}
+
+/**
+ * 由 seed 的「華泰名品城案」建立示範案（嘉義華泰名品城一期新建工程・機電空調）。
+ * 這是依實際標單（機電/空調工程）建立的五大系統完整明細：
+ *   ・大宗材料（電纜/電線/各式管）連結工率主檔既有品項，材料以主檔牌價帶入本案參考價；
+ *   ・標單其餘設備、器具、閥件等，於材料主檔新增為設備工項，參考價採標單單價；
+ *   ・工資一律由「工率 × 日工價」即時計算，不沿用標單的配管/配線工資金額。
+ */
+export function buildHuataiSampleCase(master: MasterData): Case | null {
+  const h = raw.華泰名品城案;
+  if (!h) return null;
+  const now = new Date().toISOString();
+
+  const systems: Case['systems'] = {};
+  let seq = 0;
+  for (const [sysKey, rows] of Object.entries(h.系統)) {
+    systems[sysKey] = rows.map((r) => {
+      seq += 1;
+      return {
+        id: `ht-${seq}`,
+        code: r.工項碼,
+        spec: '',
+        qty: r.數量,
+        workQty: null,
+        tierManual: '',
+        matPrice: null,
+        disc: null,
+        note: '',
+      } as LineItem;
+    });
+  }
+
+  const tiers: Record<string, string> = {};
+  for (const b of master.bigSystems) for (const s of b.subsystems) tiers[s.key] = '普通';
+
+  const derived: Record<string, number> = {};
+  for (const d of master.derivedRules) derived[d.name] = d.ratio;
+
+  return {
+    id: 'sample-huatai',
+    name: h.名稱,
+    owner: h.業主 ?? '',
+    location: h.地點 ?? '',
+    ownerName: h.編製人 ?? '',
+    created: now,
+    updated: now,
+    version: 1,
+    versions: [{ v: 1, date: now, memo: '種子建立（依標單）' }],
+    wage: h.日工價,
+    disc: h.折數,
+    tiers: tiers as Case['tiers'],
+    derived,
+    // 大宗材料以主檔牌價帶入本案參考價（相當於折數拉霸=1.0）。
+    matOverride: { ...h.本案參考價 },
+    systems,
     customSystems: [],
   };
 }
