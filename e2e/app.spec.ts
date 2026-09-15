@@ -104,6 +104,31 @@ test('工率主檔子頁：大宗材料 管材/線材 與 消防設備 分頁切
   await expect(page.getByText(/自訂 1/)).toBeVisible();
 });
 
+test('退出案件：已存檔直接回總表；有未存檔變更則提示', async ({ page }) => {
+  await openSampleCase(page);
+
+  // 剛載入＝已存檔：退出提示顯示「已儲存」，可直接回總表（案件清單）
+  await page.getByRole('button', { name: /退出/ }).click();
+  await expect(page.getByRole('heading', { name: '退出目前案件' })).toBeVisible();
+  await expect(page.getByText('已儲存').first()).toBeVisible();
+  await page.getByRole('button', { name: '退出回總表' }).click();
+  // 回到閘門（案件清單）
+  await expect(page.getByText('火警範例案（驗證基準）').first()).toBeVisible();
+
+  // 再進入並改一個參數＝有未存檔變更：退出提示顯示「尚未儲存的變更」＋儲存並退出
+  await page.getByText('火警範例案（驗證基準）').first().click();
+  await expect(page.getByText('工程總價（全案）')).toBeVisible();
+  await page.locator('.tab', { hasText: '參數設定' }).click();
+  await page.locator('input[type=number]').first().fill('5000');
+  await page.getByRole('button', { name: /退出/ }).click();
+  await expect(page.getByText('尚未儲存的變更')).toBeVisible();
+  await expect(page.getByRole('button', { name: '儲存並退出' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '不儲存直接退出' })).toBeVisible();
+  // 取消留在案件
+  await page.getByRole('button', { name: '取消' }).click();
+  await expect(page.getByRole('heading', { name: '退出目前案件' })).toHaveCount(0);
+});
+
 test('大系統兩層導覽：消防 10 項子系統 + 電氣 13 子系統結構（依標單）', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '系統明細' }).click();

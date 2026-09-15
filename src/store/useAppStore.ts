@@ -60,6 +60,8 @@ interface AppState {
   current: Case | null;
   loading: boolean;
   error: string | null;
+  /** 目前案件是否有尚未儲存的變更（退出時提示用）。載入/儲存後為 false，任一明細編輯後為 true。 */
+  dirty: boolean;
   /** 目前選中的大系統鍵（UI 狀態，系統明細/總表共用）。 */
   bigKey: string;
 
@@ -115,7 +117,7 @@ interface AppState {
 function mutate(set: (fn: (s: AppState) => Partial<AppState>) => void, fn: (c: Case) => Case) {
   set((s) => {
     if (!s.current) return {};
-    return { current: { ...fn(s.current), updated: new Date().toISOString() } };
+    return { current: { ...fn(s.current), updated: new Date().toISOString() }, dirty: true };
   });
 }
 
@@ -125,6 +127,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   current: null,
   loading: false,
   error: null,
+  dirty: false,
   bigKey: FIRE_BIG_KEY,
 
   setBigKey(bigKey) {
@@ -157,7 +160,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ error: `找不到案件 ${id}` });
       return;
     }
-    set({ current: normalizeCase(c), error: null });
+    set({ current: normalizeCase(c), error: null, dirty: false });
   },
 
   async saveCurrent() {
@@ -166,7 +169,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { cases } = getRepositories();
     const toSave: Case = { ...current, updated: new Date().toISOString() };
     await cases.save(toSave);
-    set({ current: toSave });
+    set({ current: toSave, dirty: false });
     await get().refreshList();
   },
 
@@ -179,7 +182,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const report = buildChangeReport(old, cur, indexMaster(master), master);
     const toSave: Case = { ...cur, updated: new Date().toISOString() };
     await cases.save(toSave);
-    set({ current: toSave });
+    set({ current: toSave, dirty: false });
     await get().refreshList();
     return report;
   },
@@ -205,7 +208,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     };
     await cases.save(fresh);
     await get().refreshList();
-    set({ current: fresh });
+    set({ current: fresh, dirty: false });
   },
 
   async importCase(c) {
@@ -221,7 +224,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
     await cases.save(restored);
     await get().refreshList();
-    set({ current: restored });
+    set({ current: restored, dirty: false });
   },
 
   async deleteCase(id) {
@@ -249,7 +252,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   closeCase() {
-    set({ current: null });
+    set({ current: null, dirty: false });
   },
 
   patchCase(patch) {
@@ -350,7 +353,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       versions: [...cur.versions, { v, date: now, memo: memo || `版本 ${v}` }],
       updated: now,
     };
-    set({ current: updated });
+    set({ current: updated, dirty: false });
     const { cases } = getRepositories();
     await cases.save(updated);
     await get().refreshList();

@@ -30,12 +30,13 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 export function MainApp() {
-  const { current, saveCurrentWithReport, closeCase } = useAppStore();
+  const { current, dirty, saveCurrent, saveCurrentWithReport, closeCase } = useAppStore();
   const grand = useGrandTotalAll();
   const [tab, setTab] = useState<TabKey>('overview');
   const [jumpSys, setJumpSys] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [report, setReport] = useState<ChangeReport | null>(null);
+  const [exiting, setExiting] = useState(false);
 
   if (!current) return null;
 
@@ -56,6 +57,17 @@ export function MainApp() {
     setTab('detail');
   }
 
+  async function handleSaveAndExit() {
+    await saveCurrent();
+    setExiting(false);
+    closeCase(); // 回到總表（案件清單）
+  }
+
+  function handleExitWithoutSave() {
+    setExiting(false);
+    closeCase(); // 回到總表（案件清單）
+  }
+
   return (
     <div className="app-shell">
       <div className="topbar">
@@ -70,7 +82,9 @@ export function MainApp() {
           {saved ? '已儲存 ✓' : '儲存'}
         </button>
         <button onClick={handleExport}>匯出案件</button>
-        <button onClick={closeCase}>切換案件</button>
+        <button className="danger" onClick={() => setExiting(true)}>
+          退出{dirty ? ' ●' : ''}
+        </button>
       </div>
 
       <div className="tabs">
@@ -95,6 +109,44 @@ export function MainApp() {
       {tab === 'params' && <ParamsTab />}
 
       {report && <ChangeReportModal report={report} onClose={() => setReport(null)} />}
+
+      {exiting && (
+        <div className="modal-overlay" onClick={() => setExiting(false)}>
+          <div className="modal-box" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+            <h3>退出目前案件</h3>
+            {dirty ? (
+              <>
+                <p>
+                  案件「<strong>{current.name}</strong>」有<strong className="warn">尚未儲存的變更</strong>
+                  。直接退出將遺失這些變更。
+                </p>
+                <div className="row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
+                  <button onClick={() => setExiting(false)}>取消</button>
+                  <button className="danger" onClick={handleExitWithoutSave}>
+                    不儲存直接退出
+                  </button>
+                  <button className="primary" onClick={handleSaveAndExit}>
+                    儲存並退出
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>
+                  案件「<strong>{current.name}</strong>」<strong className="ok">已儲存</strong>
+                  ，確定退出回總表（案件清單）？
+                </p>
+                <div className="row" style={{ justifyContent: 'flex-end', marginTop: 16 }}>
+                  <button onClick={() => setExiting(false)}>取消</button>
+                  <button className="primary" onClick={handleExitWithoutSave}>
+                    退出回總表
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
