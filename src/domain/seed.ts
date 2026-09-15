@@ -54,6 +54,8 @@ interface RawSeed {
   數量修正規則: Record<string, { 最高上限: number; 普通上限: number; 說明?: string }>;
   衍生費用規則: Record<string, { 基數群組: string; 預設比率: number; 合理區間: [number, number] }>;
   火警範例案: { 工項碼: string; 數量: number }[];
+  /** 火警範例案的緊急廣播設備工程（fp-02）明細（由華泰標單複製，排除配管配線等統包項）。 */
+  火警範例案_緊急廣播?: { 工項碼: string; 數量: number }[];
   吋米單價表?: {
     類別: string[];
     項目: { 管種: string; 系統: string; 價: number[] }[];
@@ -172,6 +174,19 @@ export function buildFireSampleCase(master: MasterData): Case {
     note: '',
   }));
 
+  // 緊急廣播設備工程（fp-02）：由華泰標單複製而來的明細（若種子有提供）。
+  const broadcast: LineItem[] = (raw.火警範例案_緊急廣播 ?? []).map((r, i) => ({
+    id: `fire-bc-${i + 1}`,
+    code: r.工項碼,
+    spec: '',
+    qty: r.數量,
+    workQty: null,
+    tierManual: '',
+    matPrice: null,
+    disc: null,
+    note: '',
+  }));
+
   // 各系統統一檔位預設「普通」；驗證基準即以此檔位還原真實預算書。
   const tiers: Record<string, string> = {};
   for (const b of master.bigSystems) for (const s of b.subsystems) tiers[s.key] = '普通';
@@ -194,7 +209,7 @@ export function buildFireSampleCase(master: MasterData): Case {
     tiers: tiers as Case['tiers'],
     derived,
     matOverride: {},
-    systems: { fire: lines },
+    systems: broadcast.length ? { fire: lines, 'fp-02': broadcast } : { fire: lines },
     customSystems: [],
   };
 }

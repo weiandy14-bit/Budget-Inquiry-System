@@ -12,16 +12,17 @@ async function openSampleCase(page: import('@playwright/test').Page) {
   await expect(page.getByText('工程總價（全案）')).toBeVisible();
 }
 
-test('載入火警範例案，日工價=3000 時工資還原至驗收基準 2,441,976', async ({ page }) => {
+test('載入火警範例案，日工價=3000 舊制還原（火警2,441,976＋緊急廣播＝全案2,984,358）', async ({ page }) => {
   await openSampleCase(page);
 
   // 參數設定：把綜合日工價設為 3000（舊制還原）
   await page.locator('.tab', { hasText: '參數設定' }).click();
   await page.locator('input[type=number]').first().fill('3000');
 
-  // 合理性檢核：三方案對照（日工價3000）應顯示驗收基準 2,441,976
+  // 合理性檢核：三方案對照為「全案」工資（火警系統 2,441,976 由單元測試把關；
+  // 本案另含緊急廣播設備工程，全案舊制還原＝2,984,358）。
   await page.locator('.tab', { hasText: '合理性檢核' }).click();
-  await expect(page.getByText('2,441,976').first()).toBeVisible();
+  await expect(page.getByText('2,984,358').first()).toBeVisible();
 });
 
 test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) => {
@@ -127,6 +128,23 @@ test('退出案件：已存檔直接回總表；有未存檔變更則提示', as
   // 取消留在案件
   await page.getByRole('button', { name: '取消' }).click();
   await expect(page.getByRole('heading', { name: '退出目前案件' })).toHaveCount(0);
+});
+
+test('火警範例案：緊急廣播設備工程已複製（名稱去括號、規格入規格欄、排除統包項）', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '系統明細' }).click();
+  await page.locator('.big-switch .tab', { hasText: '消防系統工程' }).click();
+  await page.locator('.sys-switch .tab', { hasText: '緊急廣播設備工程' }).click();
+
+  // 名稱去括號：廣播主機名稱不含「(內含20回路)」，規格欄以主檔規格呈現
+  const mainName = page.locator('input[value="緊急/業務兼用消防廣播主機"]');
+  await expect(mainName).toHaveCount(1);
+  const specCell = page.locator('input[placeholder="(內含20回路)"]');
+  await expect(specCell).toHaveCount(1);
+  // 喇叭名稱亦去括號
+  await expect(page.locator('input[value="壁掛/吸頂二音路喇叭"]').first()).toBeVisible();
+  // 排除項（現場施工及測試費用）不應出現
+  await expect(page.locator('input[value="現場施工及測試費用"]')).toHaveCount(0);
 });
 
 test('大系統兩層導覽：消防 10 項子系統 + 電氣 13 子系統結構（依標單）', async ({ page }) => {
