@@ -14,7 +14,8 @@ describe('buildChangeReport', () => {
     const c = buildFireSampleCase(master);
     const r = buildChangeReport(null, c, index, master);
     expect(r.firstSave).toBe(true);
-    expect(r.lineChanges.length).toBe(c.systems.fire.length);
+    const totalLines = Object.values(c.systems).reduce((n, ls) => n + ls.length, 0);
+    expect(r.lineChanges.length).toBe(totalLines);
     expect(r.lineChanges.every((l) => l.kind === 'added')).toBe(true);
     expect(r.totalBefore).toBe(0);
     expect(r.totalAfter).toBeGreaterThan(0);
