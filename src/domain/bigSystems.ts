@@ -19,7 +19,7 @@ type SubSpec = Omit<SubSystemDef, 'bigKey'>;
 // 消防系統工程 10 子系統（依「嘉義華泰名品城」標單）。火警 key 維持 'fire' 以對應種子與火警範例案。
 const FIRE_SUBS: SubSpec[] = [
   { no: '1', name: '火警自動警報設備工程', key: 'fire', status: '工率齊全' },
-  { no: '2', name: '緊急廣播設備工程', key: 'fp-02', status: '待建' },
+  { no: '2', name: '緊急廣播設備工程', key: 'fp-02', status: '工率齊全' },
   { no: '3', name: '避難及標示設備工程', key: 'fp-03', status: '待建' },
   { no: '4', name: '室內外消防栓及連結送水管及採水設備工程', key: 'fp-04', status: '待建' },
   { no: '5', name: '自動撒水設備工程', key: 'fp-05', status: '待建' },
