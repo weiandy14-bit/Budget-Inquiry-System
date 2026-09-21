@@ -21,13 +21,13 @@ const FIRE_SUBS: SubSpec[] = [
   { no: '1', name: '火警自動警報設備工程', key: 'fire', status: '工率齊全' },
   { no: '2', name: '緊急廣播設備工程', key: 'fp-02', status: '工率齊全' },
   { no: '3', name: '避難及標示設備工程', key: 'fp-03', status: '工率齊全' },
-  { no: '4', name: '室內外消防栓及連結送水管及採水設備工程', key: 'fp-04', status: '待建' },
-  { no: '5', name: '自動撒水設備工程', key: 'fp-05', status: '待建' },
-  { no: '6', name: '移動式泡沫設備工程', key: 'fp-06', status: '待建' },
-  { no: '7', name: '緊急排煙設備工程', key: 'fp-07', status: '待建' },
-  { no: '8', name: '全自動氣體滅火設備工程', key: 'fp-08', status: '待建' },
-  { no: '9', name: '廚房簡易滅火設備工程', key: 'fp-09', status: '待建' },
-  { no: '10', name: '消防會勘費用（含文件製作、不含變更設計）', key: 'fp-10', status: '待建' },
+  { no: '4', name: '室內外消防栓及連結送水管及採水設備工程', key: 'fp-04', status: '工率齊全' },
+  { no: '5', name: '自動撒水設備工程', key: 'fp-05', status: '工率齊全' },
+  { no: '6', name: '移動式泡沫設備工程', key: 'fp-06', status: '工率齊全' },
+  { no: '7', name: '緊急排煙設備工程', key: 'fp-07', status: '工率齊全' },
+  { no: '8', name: '全自動氣體滅火設備工程', key: 'fp-08', status: '工率齊全' },
+  { no: '9', name: '廚房簡易滅火設備工程', key: 'fp-09', status: '工率齊全' },
+  { no: '10', name: '消防會勘費用（含文件製作、不含變更設計）', key: 'fp-10', status: '工率齊全' },
 ];
 
 // 電氣設備工程 13 子系統（依標單）。
