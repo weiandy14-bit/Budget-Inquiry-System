@@ -19,7 +19,7 @@ test('載入火警範例案，日工價=3000 舊制還原方案顯示於合理�
   await page.locator('.tab', { hasText: '參數設定' }).click();
   await page.locator('input[type=number]').first().fill('3000');
 
-  // 合理性檢核：三方案對照顯示「舊制還原」列（火警系統 2,441,976 由單元測試把關；
+  // 合理性檢核：三方案對照顯示「舊制還原」列（火警系統 2,446,251 由單元測試把關；
   // 全案已含消防各子系統，數字為全案彙總，故不在此硬編）。
   await page.locator('.tab', { hasText: '合理性檢核' }).click();
   await expect(page.getByText('舊制還原').first()).toBeVisible();
