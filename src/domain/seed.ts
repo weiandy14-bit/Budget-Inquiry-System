@@ -157,6 +157,13 @@ export function loadMasterData(): MasterData {
 }
 
 /**
+ * 種子範例案內容版本簽章。範例案（火警/華泰）為系統維護的示範/基準案，非使用者專案；
+ * 每次調整範例案明細（新增子系統、增刪項目…）就遞增此值，載入時據此自動重植過期範例案，
+ * 讓已在瀏覽器存有舊範例案的使用者也能看到最新內容。
+ */
+export const SAMPLE_SEED_VERSION = '2026-09-21-fp-clean2';
+
+/**
  * 由 seed 的「火警範例案」建立一個驗證用案件。
  * 這是第 4 節驗證基準的輸入；也可作為新使用者的示範案。
  */
@@ -218,6 +225,7 @@ export function buildFireSampleCase(master: MasterData): Case {
     matOverride: {},
     systems: { fire: lines, ...fpSystems },
     customSystems: [],
+    seedSig: SAMPLE_SEED_VERSION,
   };
 }
 
@@ -276,5 +284,6 @@ export function buildHuataiSampleCase(master: MasterData): Case | null {
     matOverride: { ...h.本案參考價 },
     systems,
     customSystems: [],
+    seedSig: SAMPLE_SEED_VERSION,
   };
 }
