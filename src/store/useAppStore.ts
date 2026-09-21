@@ -11,7 +11,7 @@
 import { create } from 'zustand';
 import type { Case, CaseSummary, LineItem, MasterData, SubSystemDef, Tier, WorkItem } from '../domain/types';
 import { getRepositories } from '../data';
-import { buildFireSampleCase, buildHuataiSampleCase } from '../domain/seed';
+import { buildFireSampleCase, buildHuataiSampleCase, SAMPLE_SEED_VERSION } from '../domain/seed';
 import { FIRE_BIG_KEY, nextCustomKey } from '../domain/bigSystems';
 import {
   appendOrder,
@@ -238,16 +238,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { cases } = getRepositories();
     const master = get().master;
     if (!master) return;
+    // 範例案（火警/華泰）為系統維護的示範/基準案；內容版本簽章不符（或尚未植入）→ 重植，
+    // 讓瀏覽器存有舊範例案的使用者也能拿到最新明細（非使用者自建專案，可安全刷新）。
     const fire = await cases.get('sample-fire');
-    // 範例案不存在 → 植入；已存在但缺新消防子系統（以 fp-10 為最新結構標記）→ 重植（此為驗證基準案，非使用者專案，可安全刷新）。
-    if (!fire || !fire.systems['fp-10']) {
+    if (!fire || fire.seedSig !== SAMPLE_SEED_VERSION) {
       await cases.save(buildFireSampleCase(master));
       await get().refreshList();
     }
-    if (!(await cases.exists('sample-huatai'))) {
-      const huatai = buildHuataiSampleCase(master);
-      if (huatai) {
-        await cases.save(huatai);
+    const huatai = await cases.get('sample-huatai');
+    if (!huatai || huatai.seedSig !== SAMPLE_SEED_VERSION) {
+      const built = buildHuataiSampleCase(master);
+      if (built) {
+        await cases.save(built);
         await get().refreshList();
       }
     }

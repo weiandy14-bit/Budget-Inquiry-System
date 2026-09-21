@@ -212,6 +212,8 @@ export interface Case {
   systems: Record<string, LineItem[]>;
   /** 使用者於本案新增的子系統（§6.2）；空陣列＝僅用主檔預設子系統。 */
   customSystems: SubSystemDef[];
+  /** 種子範例案的內容版本簽章（僅範例案有值）；內容更新時遞增，載入時據此自動重植過期範例案。 */
+  seedSig?: string;
 }
 
 /** 案件清單摘要（閘門畫面用，避免載入整包 systems） */
