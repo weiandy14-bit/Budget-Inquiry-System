@@ -56,6 +56,8 @@ interface RawSeed {
   火警範例案: { 工項碼: string; 數量: number }[];
   /** 火警範例案的消防子系統明細（fp-02..fp-10，由華泰標單複製）：{ 子系統鍵: 明細[] }。 */
   火警範例案_消防子系統?: Record<string, { 工項碼: string; 數量: number }[]>;
+  /** 火警範例案的其他大系統子系統明細（電氣/電信弱電/給排水/空調，由華泰標單複製，已剔除統包另料）。 */
+  火警範例案_其他子系統?: Record<string, { 工項碼: string; 數量: number }[]>;
   吋米單價表?: {
     類別: string[];
     項目: { 管種: string; 系統: string; 價: number[] }[];
@@ -161,7 +163,7 @@ export function loadMasterData(): MasterData {
  * 每次調整範例案明細（新增子系統、增刪項目…）就遞增此值，載入時據此自動重植過期範例案，
  * 讓已在瀏覽器存有舊範例案的使用者也能看到最新內容。
  */
-export const SAMPLE_SEED_VERSION = '2026-09-21-fp-clean2';
+export const SAMPLE_SEED_VERSION = '2026-09-21-allsys1';
 
 /**
  * 由 seed 的「火警範例案」建立一個驗證用案件。
@@ -181,10 +183,14 @@ export function buildFireSampleCase(master: MasterData): Case {
     note: '',
   }));
 
-  // 消防子系統（fp-02..fp-10）：由華泰標單複製而來的明細（若種子有提供）。
+  // 由華泰標單複製而來的子系統明細：消防（fp-02..fp-10）＋其他大系統（電氣/電信/給排水/空調）。
   const fpSystems: Case['systems'] = {};
   let bcSeq = 0;
-  for (const [sysKey, rows] of Object.entries(raw.火警範例案_消防子系統 ?? {})) {
+  const copiedSubs = {
+    ...(raw.火警範例案_消防子系統 ?? {}),
+    ...(raw.火警範例案_其他子系統 ?? {}),
+  };
+  for (const [sysKey, rows] of Object.entries(copiedSubs)) {
     fpSystems[sysKey] = rows.map((r) => {
       bcSeq += 1;
       return {
