@@ -239,8 +239,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const master = get().master;
     if (!master) return;
     const fire = await cases.get('sample-fire');
-    // 範例案不存在 → 植入；已存在但缺新結構（緊急廣播 fp-02）→ 重植（此為驗證基準案，非使用者專案，可安全刷新）。
-    if (!fire || !fire.systems['fp-02']) {
+    // 範例案不存在 → 植入；已存在但缺新消防子系統（以 fp-10 為最新結構標記）→ 重植（此為驗證基準案，非使用者專案，可安全刷新）。
+    if (!fire || !fire.systems['fp-10']) {
       await cases.save(buildFireSampleCase(master));
       await get().refreshList();
     }

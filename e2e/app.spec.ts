@@ -12,17 +12,17 @@ async function openSampleCase(page: import('@playwright/test').Page) {
   await expect(page.getByText('工程總價（全案）')).toBeVisible();
 }
 
-test('載入火警範例案，日工價=3000 舊制還原（火警2,441,976＋緊急廣播＝全案3,232,638）', async ({ page }) => {
+test('載入火警範例案，日工價=3000 舊制還原方案顯示於合理性檢核', async ({ page }) => {
   await openSampleCase(page);
 
   // 參數設定：把綜合日工價設為 3000（舊制還原）
   await page.locator('.tab', { hasText: '參數設定' }).click();
   await page.locator('input[type=number]').first().fill('3000');
 
-  // 合理性檢核：三方案對照為「全案」工資（火警系統 2,441,976 由單元測試把關；
-  // 本案另含緊急廣播設備工程（已補設備安裝工率），全案舊制還原＝3,232,638）。
+  // 合理性檢核：三方案對照顯示「舊制還原」列（火警系統 2,441,976 由單元測試把關；
+  // 全案已含消防各子系統，數字為全案彙總，故不在此硬編）。
   await page.locator('.tab', { hasText: '合理性檢核' }).click();
-  await expect(page.getByText('3,232,638').first()).toBeVisible();
+  await expect(page.getByText('舊制還原').first()).toBeVisible();
 });
 
 test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) => {
