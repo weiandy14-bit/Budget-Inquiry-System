@@ -1,6 +1,8 @@
 /** 材料 CSV 批次匯入解析單元測試。 */
 import { describe, expect, it } from 'vitest';
-import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv } from './materialCsv';
+import { MATERIAL_CSV_TEMPLATE, parseMaterialCsv, rateBulkToCsv } from './materialCsv';
+import { loadMasterData } from './seed';
+import { rateGroupOf } from './workItems';
 
 describe('parseMaterialCsv', () => {
   it('基本解析：群組/分類/單位/參考價', () => {
@@ -95,5 +97,36 @@ describe('parseMaterialCsv', () => {
     const { items } = parseMaterialCsv(csv, { matCat: '管線材料' });
     expect(items[0].lay).toBe('明管');
     expect(items[1].lay).toBe('管內');
+  });
+
+  it('工項碼/細類欄可解析（供回匯對應既有項）', () => {
+    const csv = '工項碼,名稱,規格,細類,牌價\nRSG-001,RSG管,104mmt,RSG,314\n';
+    const { items } = parseMaterialCsv(csv, { matCat: '管線材料' });
+    expect(items[0].code).toBe('RSG-001');
+    expect(items[0].plCat).toBe('RSG');
+    expect(items[0].listPrice).toBe(314);
+  });
+});
+
+describe('rateBulkToCsv（大宗材料匯出）＋回匯 round-trip', () => {
+  const master = loadMasterData();
+  const bulk = master.workItems.filter(
+    (w) => rateGroupOf(w) === '大宗材料管材' || rateGroupOf(w) === '大宗材料線材',
+  );
+
+  it('輸出含工項碼表頭，且列數＝大宗材料項數', () => {
+    const csv = rateBulkToCsv(bulk);
+    expect(csv).toContain('工項碼,名稱,規格,單位,群組,分類,細類');
+    const dataRows = csv.trim().split('\n').length - 1; // 扣表頭
+    expect(dataRows).toBe(bulk.length);
+  });
+
+  it('匯出→重新解析可還原工項碼與牌價（以 EMT 為例）', () => {
+    const csv = rateBulkToCsv(bulk);
+    const { items } = parseMaterialCsv(csv, { matCat: '管線材料' });
+    const emt = items.find((i) => i.code === 'EMT-005');
+    expect(emt).toBeTruthy();
+    expect(emt!.spec).toBe('E31');
+    expect(emt!.listPrice).toBe(67);
   });
 });

@@ -5,9 +5,13 @@
  *   牌價 / 工率_最高 / 工率_普通 / 工率_最低（或單一「工率」→普通） / 吋米種類 / 設備系統別
  * 支援引號包欄（含逗號）、Excel BOM。缺群組時依分類推導、缺分類時用當前子頁分類。
  */
-import type { CostGroup, MatCategory } from './types';
+import type { CostGroup, MatCategory, WorkItem } from './types';
 
 export interface ParsedMaterial {
+  /** 工項碼（匯出/回匯時對應既有工項以更新；未提供＝新增）。 */
+  code?: string;
+  /** 管線材料細類（電纜/電線/RSG/EMT/PVC…；折數拉霸分組用）。 */
+  plCat?: string;
   name: string;
   spec: string;
   unit: string;
@@ -45,6 +49,12 @@ const MAT_CATS: MatCategory[] = ['管線材料', '設備器材', '其他附屬�
 
 // 表頭別名 → 標準欄位
 const HEADER_ALIASES: Record<string, string> = {
+  工項碼: 'code',
+  碼: 'code',
+  code: 'code',
+  細類: 'plCat',
+  管線材料細類: 'plCat',
+  plcat: 'plCat',
   名稱: 'name',
   品名: 'name',
   項目: 'name',
@@ -181,8 +191,12 @@ export function parseMaterialCsv(text: string, defaults: { matCat: MatCategory }
     const imType = get('imType') || undefined;
     const eqSys = get('eqSys') || undefined;
     const lay = get('lay') || undefined;
+    const code = get('code') || undefined;
+    const plCat = get('plCat') || undefined;
 
     items.push({
+      code,
+      plCat,
       name,
       spec,
       unit,
@@ -200,4 +214,40 @@ export function parseMaterialCsv(text: string, defaults: { matCat: MatCategory }
   }
 
   return { items, errors };
+}
+
+/** 匯出 CSV 的欄位（與 parseMaterialCsv 表頭別名對應，可原樣回匯）。 */
+export const RATE_BULK_CSV_HEADER =
+  '工項碼,名稱,規格,單位,群組,分類,細類,參考價,牌價,工率_最高,工率_普通,工率_最低,吋米種類,設備系統別';
+
+function csvCell(v: string | number | undefined | null): string {
+  const s = v === undefined || v === null ? '' : String(v);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/**
+ * 將工項清單輸出成 CSV（工率主檔 大宗材料 匯出用）。含工項碼，供編輯後原樣回匯（依碼更新既有項）。
+ */
+export function rateBulkToCsv(items: WorkItem[]): string {
+  const rows = items.map((w) =>
+    [
+      w.code,
+      w.name,
+      w.spec,
+      w.unit,
+      w.grp,
+      w.matCat ?? '',
+      w.plCat ?? '',
+      w.refPrice,
+      w.listPrice ?? '',
+      w.rateHi,
+      w.rateMid,
+      w.rateLo,
+      w.imType ?? '',
+      w.eqSys ?? '',
+    ]
+      .map(csvCell)
+      .join(','),
+  );
+  return '﻿' + RATE_BULK_CSV_HEADER + '\n' + rows.join('\n') + '\n';
 }

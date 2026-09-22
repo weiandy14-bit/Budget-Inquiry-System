@@ -38,6 +38,20 @@ describe('SeedMasterRepository 自訂工項合併', () => {
     expect(added?.custom).toBe(true);
   });
 
+  it('同碼自訂項覆蓋種子項（可改種子牌價/工率；總數不變）', async () => {
+    const before = await repo.load();
+    const seed = before.workItems.find((w) => w.code === 'EMT-005')!;
+    expect(seed.custom).toBeFalsy();
+    // 以同碼自訂項覆蓋（改牌價）
+    await repo.saveWorkItem({ ...seed, listPrice: 999, custom: true });
+    const after = await repo.load();
+    expect(after.workItems.length).toBe(before.workItems.length); // shadow 取代、非新增
+    const emt = after.workItems.filter((w) => w.code === 'EMT-005');
+    expect(emt.length).toBe(1); // 仍唯一
+    expect(emt[0].listPrice).toBe(999);
+    expect(emt[0].custom).toBe(true);
+  });
+
   it('刪除自訂工項後 load 不再包含', async () => {
     await repo.saveWorkItem(buildCustomWorkItem('U-0001', 'A'));
     await repo.deleteWorkItem('U-0001');
