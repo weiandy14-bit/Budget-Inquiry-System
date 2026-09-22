@@ -21,8 +21,11 @@ import {
   matCategoryOf,
   materialKey,
   nextCustomCode,
+  orderedWorkItems,
+  rateGroupOf,
   type CustomItemOpts,
 } from '../domain/workItems';
+import { rateBulkToCsv } from '../domain/materialCsv';
 import { indexMaster } from '../engine/calc';
 import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
 import { migrateCode } from '../domain/codeMigration';
@@ -106,6 +109,18 @@ interface AppState {
   importMaterials: (rows: ParsedMaterial[]) => Promise<number>;
   /** 清除重複材料：同（名稱＋規格）僅保留一筆（種子優先、其次最早自訂項），刪除其餘自訂重複項；回傳刪除筆數。 */
   dedupeMaterials: () => Promise<number>;
+  /** 匯出工率主檔「大宗材料（管材＋線材）」為 CSV 字串（含工項碼，可編輯後回匯）。 */
+  exportRateBulkCsv: () => string;
+  /**
+   * 匯入大宗材料（管材＋線材）CSV 列。
+   *   mode='append'：往下匯入——保留既有，依工項碼／名稱規格更新對應項，其餘新增於末尾。
+   *   mode='overwrite'：全部重新匯入——先刪除大宗材料所有自訂項（回復種子），再套用匯入列。
+   * 回傳 { added, updated, removed }。
+   */
+  importRateBulk: (
+    rows: ParsedMaterial[],
+    mode: 'append' | 'overwrite',
+  ) => Promise<{ added: number; updated: number; removed: number }>;
   /**
    * 明細表「打名稱→自動建碼」：
    * 依名稱解析既有工項並設定該列 code；查無則自動新增自訂工項再指派。
@@ -481,6 +496,112 @@ export const useAppStore = create<AppState>((set, get) => ({
     for (const code of toDelete) await masters.deleteWorkItem(code);
     if (toDelete.length) set({ master: await masters.load() });
     return toDelete.length;
+  },
+
+  exportRateBulkCsv() {
+    const master = get().master;
+    if (!master) return '';
+    const isBulk = (w: WorkItem) =>
+      rateGroupOf(w) === '大宗材料管材' || rateGroupOf(w) === '大宗材料線材';
+    // 依主檔顯示順序（管材在前、線材在後），輸出含工項碼的 CSV。
+    const items = [
+      ...orderedWorkItems(master.workItems, (w) => rateGroupOf(w) === '大宗材料管材'),
+      ...orderedWorkItems(master.workItems, (w) => rateGroupOf(w) === '大宗材料線材'),
+    ].filter(isBulk);
+    return rateBulkToCsv(items);
+  },
+
+  async importRateBulk(rows, mode) {
+    const { masters } = getRepositories();
+    const master = get().master;
+    if (!master) return { added: 0, updated: 0, removed: 0 };
+    const isBulk = (w: WorkItem) =>
+      rateGroupOf(w) === '大宗材料管材' || rateGroupOf(w) === '大宗材料線材';
+
+    // 覆蓋模式：先刪除大宗材料所有自訂項（含覆蓋種子的 shadow），回復為種子基準。
+    let removed = 0;
+    if (mode === 'overwrite') {
+      for (const w of master.workItems) {
+        if (w.custom && isBulk(w)) {
+          await masters.deleteWorkItem(w.code);
+          removed += 1;
+        }
+      }
+    }
+
+    const cur = mode === 'overwrite' ? await masters.load() : master;
+    const byCode = new Map(cur.workItems.map((w) => [w.code, w]));
+    const byKey = new Map(
+      cur.workItems.filter(isBulk).map((w) => [materialKey(w.name, w.spec), w]),
+    );
+    const used = new Set(cur.workItems.map((w) => w.code));
+    let n = 1;
+    const nextCode = () => {
+      let c = `U-${String(n).padStart(4, '0')}`;
+      while (used.has(c)) {
+        n += 1;
+        c = `U-${String(n).padStart(4, '0')}`;
+      }
+      used.add(c);
+      n += 1;
+      return c;
+    };
+    let ord = appendOrder(cur.workItems);
+    let added = 0;
+    let updated = 0;
+
+    for (const r of rows) {
+      const matCat = r.matCat ?? '管線材料';
+      const target =
+        (r.code ? byCode.get(r.code) : undefined) ?? byKey.get(materialKey(r.name, r.spec));
+      if (target) {
+        // 更新既有項（種子項→存為同碼 shadow 自訂項；自訂項→直接更新）。有值才覆寫。
+        const upd: WorkItem = {
+          ...target,
+          name: r.name,
+          spec: r.spec,
+          unit: r.unit,
+          grp: r.grp,
+          matCat,
+          plCat: r.plCat ?? target.plCat,
+          refPrice: r.refPrice,
+          listPrice: r.listPrice ?? target.listPrice,
+          rateHi: r.rateHi ?? target.rateHi,
+          rateMid: r.rateMid ?? target.rateMid,
+          rateLo: r.rateLo ?? target.rateLo,
+          imType: r.imType ?? target.imType,
+          eqSys: r.eqSys ?? target.eqSys,
+          lay: r.lay ?? target.lay,
+        };
+        await masters.saveWorkItem(upd);
+        updated += 1;
+      } else {
+        const code = r.code && !used.has(r.code) ? (used.add(r.code), r.code) : nextCode();
+        const base = buildCustomWorkItem(code, r.name, {
+          grp: r.grp,
+          matCat,
+          unit: r.unit,
+          eqSys: r.eqSys,
+          lay: r.lay,
+        });
+        await masters.saveWorkItem({
+          ...base,
+          spec: r.spec,
+          refPrice: r.refPrice,
+          order: ord,
+          ...(r.plCat !== undefined ? { plCat: r.plCat } : {}),
+          ...(r.listPrice !== undefined ? { listPrice: r.listPrice } : {}),
+          ...(r.rateHi !== undefined ? { rateHi: r.rateHi } : {}),
+          ...(r.rateMid !== undefined ? { rateMid: r.rateMid } : {}),
+          ...(r.rateLo !== undefined ? { rateLo: r.rateLo } : {}),
+          ...(r.imType !== undefined ? { imType: r.imType } : {}),
+        });
+        ord += 1;
+        added += 1;
+      }
+    }
+    set({ master: await masters.load() });
+    return { added, updated, removed };
   },
 
   async assignLineByName(sysKey, lineId, name) {
