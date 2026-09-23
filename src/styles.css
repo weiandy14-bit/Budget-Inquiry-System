@@ -30,6 +30,7 @@ button {
   border: 1px solid #c3c8d0;
   border-radius: 6px;
   background: #fff;
+  color: #1a1a1a; /* 明確黑字：不隨瀏覽器/宿主深色主題把按鈕文字變淺 */
   cursor: pointer;
 }
 button:hover {
