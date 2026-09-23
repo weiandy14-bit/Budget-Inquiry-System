@@ -8,8 +8,6 @@ import { groupColor } from '../theme';
 import { num } from '../format';
 import { newItemOptsForRateGroup, orderedWorkItems, rateGroupOf } from '../../domain/workItems';
 import { RATE_GROUPS, RATE_GROUP_LABELS, type CostGroup } from '../../domain/types';
-import { downloadText, pickTextFile } from '../download';
-import { parseMaterialCsv } from '../../domain/materialCsv';
 
 const GROUPS: CostGroup[] = ['設備', '管材', '電線'];
 
@@ -19,38 +17,8 @@ export function RateMasterTab() {
   const insertWorkItemAfter = useAppStore((s) => s.insertWorkItemAfter);
   const updateWorkItem = useAppStore((s) => s.updateWorkItem);
   const deleteWorkItem = useAppStore((s) => s.deleteWorkItem);
-  const exportRateBulkCsv = useAppStore((s) => s.exportRateBulkCsv);
-  const importRateBulk = useAppStore((s) => s.importRateBulk);
   const [group, setGroup] = useState<string>('大宗材料管材');
   const [q, setQ] = useState('');
-  const [ioMsg, setIoMsg] = useState('');
-
-  const isBulk = group === '大宗材料管材' || group === '大宗材料線材';
-
-  async function handleExport() {
-    const csv = exportRateBulkCsv();
-    await downloadText('大宗材料工率主檔.csv', csv, 'text/csv');
-    setIoMsg('已匯出大宗材料（管材＋線材）CSV。');
-  }
-
-  async function handleImport(mode: 'append' | 'overwrite') {
-    if (mode === 'overwrite' && !window.confirm('全部重新匯入將先刪除大宗材料的所有自訂項（回復種子），再套用匯入檔。確定繼續？')) return;
-    const text = await pickTextFile('.csv,.txt');
-    if (text == null) return;
-    const { items, errors } = parseMaterialCsv(text, { matCat: '管線材料' });
-    if (items.length === 0) {
-      setIoMsg(`匯入失敗：${errors[0] ?? '無有效資料列'}`);
-      return;
-    }
-    const { added, updated, removed } = await importRateBulk(items, mode);
-    const parts = [
-      mode === 'overwrite' ? `覆蓋：清除自訂 ${removed} 筆` : '往下匯入',
-      `更新 ${updated} 筆`,
-      `新增 ${added} 筆`,
-    ];
-    if (errors.length) parts.push(`略過 ${errors.length} 列`);
-    setIoMsg(parts.join('，') + '。');
-  }
 
   // 各子頁筆數（供分頁標籤）。
   const counts = useMemo(() => {
@@ -107,15 +75,6 @@ export function RateMasterTab() {
         </button>
       </div>
 
-      {isBulk && (
-        <div className="row no-print" style={{ margin: '0 0 12px', gap: 8, flexWrap: 'wrap' }}>
-          <span className="muted">大宗材料（管材＋線材）匯出／匯入：</span>
-          <button onClick={handleExport}>⤓ 匯出 CSV</button>
-          <button onClick={() => handleImport('append')}>⤒ 往下匯入</button>
-          <button onClick={() => handleImport('overwrite')}>↻ 全部重新匯入（覆蓋）</button>
-          {ioMsg && <span className="ok">{ioMsg}</span>}
-        </div>
-      )}
       <div className="table-scroll" style={{ maxHeight: 560, overflowY: 'auto' }}>
         <table>
           <thead>
