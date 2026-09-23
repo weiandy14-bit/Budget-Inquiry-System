@@ -20,6 +20,7 @@ import {
   insertOrderAfter,
   matCategoryOf,
   materialKey,
+  materialSubtabOf,
   nextCustomCode,
   orderedWorkItems,
   rateGroupOf,
@@ -109,8 +110,12 @@ interface AppState {
   importMaterials: (rows: ParsedMaterial[]) => Promise<number>;
   /** 清除重複材料：同（名稱＋規格）僅保留一筆（種子優先、其次最早自訂項），刪除其餘自訂重複項；回傳刪除筆數。 */
   dedupeMaterials: () => Promise<number>;
-  /** 匯出工率主檔「大宗材料（管材＋線材）」為 CSV 字串（含工項碼，可編輯後回匯）。 */
-  exportRateBulkCsv: () => string;
+  /**
+   * 匯出「大宗材料（管材＋線材）」為 CSV 字串（含工項碼，可編輯後回匯）。
+   * materialOnly=true 時只匯出材料主檔顯示的型錄材料（materialSubtabOf 非 null），
+   * 使匯出內容與順序與材料主檔畫面一致；預設 false＝工率主檔全集。
+   */
+  exportRateBulkCsv: (materialOnly?: boolean) => string;
   /**
    * 匯入大宗材料（管材＋線材）CSV 列。
    *   mode='append'：往下匯入——保留既有，依工項碼／名稱規格更新對應項，其餘新增於末尾。
@@ -498,16 +503,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     return toDelete.length;
   },
 
-  exportRateBulkCsv() {
+  exportRateBulkCsv(materialOnly = false) {
     const master = get().master;
     if (!master) return '';
-    const isBulk = (w: WorkItem) =>
-      rateGroupOf(w) === '大宗材料管材' || rateGroupOf(w) === '大宗材料線材';
+    // materialOnly＝只取材料主檔會顯示的型錄材料，讓匯出與材料主檔畫面同序同內容。
+    const visible = (w: WorkItem) => !materialOnly || materialSubtabOf(w) !== null;
     // 依主檔顯示順序（管材在前、線材在後），輸出含工項碼的 CSV。
     const items = [
-      ...orderedWorkItems(master.workItems, (w) => rateGroupOf(w) === '大宗材料管材'),
-      ...orderedWorkItems(master.workItems, (w) => rateGroupOf(w) === '大宗材料線材'),
-    ].filter(isBulk);
+      ...orderedWorkItems(
+        master.workItems,
+        (w) => rateGroupOf(w) === '大宗材料管材' && visible(w),
+      ),
+      ...orderedWorkItems(
+        master.workItems,
+        (w) => rateGroupOf(w) === '大宗材料線材' && visible(w),
+      ),
+    ];
     return rateBulkToCsv(items);
   },
 
