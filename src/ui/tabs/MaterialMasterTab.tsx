@@ -59,7 +59,7 @@ export function MaterialMasterTab() {
   }
 
   async function handleExportBulk() {
-    const csv = exportRateBulkCsv();
+    const csv = exportRateBulkCsv(true);
     await downloadText('大宗材料主檔.csv', csv, 'text/csv');
     setImportMsg('已匯出大宗材料（管材＋線材）CSV。');
   }
