@@ -112,9 +112,7 @@ export function RateMasterTab() {
           <span className="muted">大宗材料（管材＋線材）匯出／匯入：</span>
           <button onClick={handleExport}>⤓ 匯出 CSV</button>
           <button onClick={() => handleImport('append')}>⤒ 往下匯入</button>
-          <button className="danger" onClick={() => handleImport('overwrite')}>
-            ↻ 全部重新匯入（覆蓋）
-          </button>
+          <button onClick={() => handleImport('overwrite')}>↻ 全部重新匯入（覆蓋）</button>
           {ioMsg && <span className="ok">{ioMsg}</span>}
         </div>
       )}
