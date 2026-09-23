@@ -36,6 +36,8 @@ export function MaterialMasterTab() {
   const importMaterials = useAppStore((s) => s.importMaterials);
   const dedupeMaterials = useAppStore((s) => s.dedupeMaterials);
   const applyListPriceDiscount = useAppStore((s) => s.applyListPriceDiscount);
+  const exportRateBulkCsv = useAppStore((s) => s.exportRateBulkCsv);
+  const importRateBulk = useAppStore((s) => s.importRateBulk);
   const [group, setGroup] = useState<string>('大宗材料管材');
   const [q, setQ] = useState('');
   const [importMsg, setImportMsg] = useState('');
@@ -54,6 +56,35 @@ export function MaterialMasterTab() {
     if (dupSkipped > 0) parts.push(`略過重複 ${dupSkipped} 筆`);
     if (errors.length) parts.push(`略過 ${errors.length} 列（${errors[0]}${errors.length > 1 ? '…' : ''}）`);
     setImportMsg(parts.join('；'));
+  }
+
+  async function handleExportBulk() {
+    const csv = exportRateBulkCsv();
+    await downloadText('大宗材料主檔.csv', csv, 'text/csv');
+    setImportMsg('已匯出大宗材料（管材＋線材）CSV。');
+  }
+
+  async function handleImportBulk(mode: 'append' | 'overwrite') {
+    if (
+      mode === 'overwrite' &&
+      !window.confirm('全部重新匯入將先刪除大宗材料的所有自訂項（回復種子），再套用匯入檔。確定繼續？')
+    )
+      return;
+    const text = await pickTextFile('.csv,.txt');
+    if (text == null) return;
+    const { items, errors } = parseMaterialCsv(text, { matCat: '管線材料' });
+    if (items.length === 0) {
+      setImportMsg(`匯入失敗：${errors[0] ?? '無有效資料列'}`);
+      return;
+    }
+    const { added, updated, removed } = await importRateBulk(items, mode);
+    const parts = [
+      mode === 'overwrite' ? `覆蓋：清除自訂 ${removed} 筆` : '往下匯入',
+      `更新 ${updated} 筆`,
+      `新增 ${added} 筆`,
+    ];
+    if (errors.length) parts.push(`略過 ${errors.length} 列`);
+    setImportMsg(parts.join('，') + '。');
   }
 
   const counts = useMemo(() => {
@@ -120,12 +151,16 @@ export function MaterialMasterTab() {
         >
           ＋ 新增{isBulk(group) ? '材料' : '設備'}
         </button>
-        <button onClick={handleImport}>匯入 CSV</button>
-        <button
-          onClick={() => downloadText('材料匯入範本.csv', MATERIAL_CSV_TEMPLATE, 'text/csv')}
-        >
-          下載範本
-        </button>
+        {!isBulk(group) && (
+          <>
+            <button onClick={handleImport}>匯入 CSV</button>
+            <button
+              onClick={() => downloadText('材料匯入範本.csv', MATERIAL_CSV_TEMPLATE, 'text/csv')}
+            >
+              下載範本
+            </button>
+          </>
+        )}
         <button
           title="同名稱＋規格僅保留一筆（種子優先、其次最早自訂項）"
           onClick={async () => {
@@ -136,6 +171,15 @@ export function MaterialMasterTab() {
           清除重複
         </button>
       </div>
+
+      {isBulk(group) && (
+        <div className="row no-print" style={{ margin: '0 0 12px', gap: 8, flexWrap: 'wrap' }}>
+          <span className="muted">大宗材料（管材＋線材）匯出／匯入：</span>
+          <button onClick={handleExportBulk}>⤓ 匯出 CSV</button>
+          <button onClick={() => handleImportBulk('append')}>⤒ 往下匯入</button>
+          <button onClick={() => handleImportBulk('overwrite')}>↻ 全部重新匯入（覆蓋）</button>
+        </div>
+      )}
       {importMsg && (
         <p className="muted" style={{ marginTop: -4 }}>
           {importMsg}
