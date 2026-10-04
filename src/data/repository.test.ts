@@ -130,6 +130,53 @@ describe('案件備份 匯出/匯入', () => {
     expect(imported.customItems).toEqual([]);
   });
 
+  it('v1 舊資料缺少 customSystems 與明細 spec 時會補上安全預設', () => {
+    const legacy = JSON.parse(exportCaseToJson(makeCase('C-780', '舊欄位備份')));
+    legacy.formatVersion = 1;
+    delete legacy.customItems;
+    delete legacy.case.customSystems;
+    for (const lines of Object.values(legacy.case.systems) as Record<string, unknown>[][]) {
+      for (const line of lines) delete line.spec;
+    }
+    const imported = importBackupFromJson(JSON.stringify(legacy));
+    expect(imported.case.customSystems).toEqual([]);
+    expect(imported.case.systems.fire[0].spec).toBe('');
+  });
+
+  it.each([
+    ['案件金額欄位型別錯誤', (b: any) => { b.case.wage = '4475'; }, 'case.wage'],
+    ['明細數量為負數', (b: any) => { b.case.systems.fire[0].qty = -1; }, 'case.systems.fire[0].qty'],
+    ['明細手動檔位非法', (b: any) => { b.case.systems.fire[0].tierManual = '中'; }, 'tierManual'],
+    ['系統鍵不在主檔或自訂系統', (b: any) => { b.case.systems.rogue = []; }, 'case.systems.rogue'],
+    ['系統統一檔位鍵未知', (b: any) => { b.case.tiers.rogue = '普通'; }, 'case.tiers.rogue'],
+    ['明細列 id 重複', (b: any) => { b.case.systems.fire.push({ ...b.case.systems.fire[0] }); }, '不可與其他明細列重複'],
+    ['自訂子系統的大系統鍵未知', (b: any) => {
+      b.case.customSystems.push({ no: '1', name: '錯誤系統', key: 'custom-1', status: '待建', bigKey: 'rogue' });
+    }, 'case.customSystems[0].bigKey'],
+  ])('拒絕%s', (_label, mutate, expected) => {
+    const backup = JSON.parse(exportCaseToJson(makeCase('C-781', '錯誤備份')));
+    mutate(backup);
+    expect(() => importBackupFromJson(JSON.stringify(backup))).toThrow(expected);
+  });
+
+  it.each([
+    ['非自訂旗標', (b: any) => { b.customItems[0].custom = false; }, 'customItems[0].custom'],
+    ['非法自訂碼', (b: any) => { b.customItems[0].code = 'F-01-001'; }, 'customItems[0].code'],
+    ['負工率', (b: any) => { b.customItems[0].rateMid = -0.1; }, 'customItems[0].rateMid'],
+    ['重複工項碼', (b: any) => { b.customItems.push({ ...b.customItems[0] }); }, '含重複的工項碼'],
+    ['缺少案件引用工項', (b: any) => { b.customItems = []; }, '缺少案件引用的自訂工項'],
+    ['夾帶案件未引用工項', (b: any) => {
+      b.customItems.push({ ...b.customItems[0], code: 'U-0002', name: '未引用工項' });
+    }, '包含案件未引用的自訂工項'],
+  ])('拒絕自訂工項%s', (_label, mutate, expected) => {
+    const c = makeCase('C-782', '錯誤自訂工項');
+    const item = buildCustomWorkItem('U-0001', '備份自訂工項');
+    c.systems.fire[0].code = item.code;
+    const backup = JSON.parse(exportCaseToJson(c, [item]));
+    mutate(backup);
+    expect(() => importBackupFromJson(JSON.stringify(backup))).toThrow(expected);
+  });
+
   it('自訂工項匯入會區分新增、相同與衝突', () => {
     const same = buildCustomWorkItem('U-0001', '相同');
     const current = buildCustomWorkItem('U-0002', '本機版本');

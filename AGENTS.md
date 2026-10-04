@@ -108,7 +108,7 @@ src/
 
 - Phase 1 技術盤點見 `docs/TECHNICAL_AUDIT.md`；相依安全報告已清為 0。
 - Bundle 決策見 `docs/BUNDLE_DECISION.md`；因自包含單檔需求暫不 code-split，以 1,800 kB 為成長上限。
-- Phase 2 的 v2 完整備份已納入案件引用的自訂工項；下一步依序補齊嚴格匯入驗證與 IndexedDB 升級／復原測試。
+- Phase 2 的 v2 完整備份與嚴格匯入驗證已完成；下一步補齊 IndexedDB 升級／復原測試。
 - 功能方向：其他大系統（電力／弱電／給排水／空調）目前僅空結構占位，待補子系統與工率資料。
 
 ---
