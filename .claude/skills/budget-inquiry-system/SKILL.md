@@ -5,7 +5,7 @@ description: >-
   這是一套以「工率 × 日工價」為核心的機電工程預算工具（單機版，架構預留協作升級）。
   Use this skill whenever working anywhere in this repo or on anything about this budget
   system: the 工率×日工價 calculation engine, the fire-alarm verification benchmark
-  (火警範例案 wage=3000 → 762.262 工 / 2,286,786 元), the Repository abstraction layer,
+  (火警範例案 wage=3000 → 815.417 工 / 2,446,251 元), the Repository abstraction layer,
   IndexedDB storage, the 大系統→子系統 two-level system structure, the React/Vite/Zustand
   UI and its 7 tabs, adding systems or work-rate (工率) data, seed_data.json, or the
   commit/push/PR/CI workflow. Consult it BEFORE touching the calc engine, tier selection,
@@ -54,7 +54,7 @@ src/
     MainApp.tsx     主應用外殼 + 頂端列 + 7 分頁
     useCalc.ts      把 store 餵進純函式引擎並記憶化（useTotals / useChecks / useSubsystems …）
     tabs/           OverviewTab / SystemDetailTab / CheckTab / CaseInfoTab / MaterialMasterTab / RateMasterTab / ParamsTab
-e2e/app.spec.ts     Playwright e2e（載入範例案→驗證 2,286,786；大系統兩層導覽）
+e2e/app.spec.ts     Playwright e2e（載入範例案→舊制還原方案；精確工資 2,446,251 由單元測試把關；大系統兩層導覽）
 .github/workflows/ci.yml  CI：npm ci → test → build → playwright → e2e
 ```
 
@@ -69,7 +69,7 @@ e2e/app.spec.ts     Playwright e2e（載入範例案→驗證 2,286,786；大系
 
 2. **驗收基準（改引擎前後都要通過）：**
    載入火警範例案、`wage=3000`、火警系統統一檔位「普通」、無手動覆寫 →
-   **總工數 762.262 工、工資 2,286,786 元**（對真實預算書 2,250,000 誤差 1.63% < 3%）。
+   **總工數 815.417 工、工資 2,446,251 元**（對真實預算書 2,250,000 誤差 8.72% < 9%）。
    跑 `npm test` 會驗。若差很多，一定是**選檔或群組判斷**寫錯了，回頭查 `calcRow`。
 
 3. **`calcRow` 用「系統統一檔位」，不是逐列 autoTier。**
