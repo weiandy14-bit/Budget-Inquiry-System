@@ -43,8 +43,14 @@ export class SeedMasterRepository implements MasterRepository {
   }
 
   async saveWorkItem(item: WorkItem): Promise<void> {
+    await this.saveWorkItems([item]);
+  }
+
+  async saveWorkItems(items: WorkItem[]): Promise<void> {
     const db = await getDB();
-    await db.put('customItems', { ...item, custom: true });
+    const tx = db.transaction('customItems', 'readwrite');
+    await Promise.all(items.map((item) => tx.store.put({ ...item, custom: true })));
+    await tx.done;
   }
 
   async deleteWorkItem(code: string): Promise<void> {

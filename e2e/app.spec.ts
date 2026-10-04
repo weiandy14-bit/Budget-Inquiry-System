@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 /**
  * 端對端煙霧測試：驗證整條前端管線（seed → IndexedDB → store → 計算引擎 → 畫面）。
@@ -159,4 +160,55 @@ test('大系統兩層導覽：消防 10 項子系統 + 電氣 13 子系統結構
   await page.locator('.big-switch .tab', { hasText: '電氣系統工程' }).click();
   await expect(page.getByText('高低壓配電盤設備工程')).toBeVisible();
   await expect(page.getByText('報竣前變更及電機技師簽證費(含送臨時電)')).toBeVisible();
+});
+
+test('完整備份 v2：匯出案件引用的自訂工項，並可在全新瀏覽器還原', async ({ page, browser, baseURL }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '系統明細' }).click();
+  await page.getByRole('button', { name: '＋ 新增明細列' }).click();
+  const customName = `備份測試自訂工項-${Date.now()}`;
+  const nameInput = page.getByPlaceholder('輸入名稱，查無自動建碼').last();
+  await nameInput.fill(customName);
+  await nameInput.press('Enter');
+
+  await page.locator('.tab', { hasText: '工率主檔' }).click();
+  await page.locator('.sys-switch .tab', { hasText: '電力電信設備' }).click();
+  await expect.poll(() =>
+    page.locator('input').evaluateAll((inputs) =>
+      inputs.map((input) => (input as HTMLInputElement).value),
+    ),
+  ).toContain(customName);
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: '匯出完整備份' }).click();
+  const download = await downloadPromise;
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  const backupText = await readFile(downloadPath!, 'utf8');
+  const backup = JSON.parse(backupText) as { formatVersion: number; customItems: { name: string }[] };
+  expect(backup.formatVersion).toBe(2);
+  expect(backup.customItems.map((item) => item.name)).toContain(customName);
+
+  const cleanPage = await browser.newPage({ baseURL });
+  await cleanPage.goto('/');
+  let confirmation = '';
+  cleanPage.on('dialog', async (dialog) => {
+    confirmation = dialog.message();
+    await dialog.accept();
+  });
+  const chooserPromise = cleanPage.waitForEvent('filechooser');
+  await cleanPage.getByRole('button', { name: '匯入案件備份（.json）' }).click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({ name: 'complete-backup.json', mimeType: 'application/json', buffer: Buffer.from(backupText) });
+
+  await expect(cleanPage.getByText('工程總價（全案）')).toBeVisible();
+  expect(confirmation).toContain('自訂工項：新增 1、相同 0、衝突 0');
+  await cleanPage.locator('.tab', { hasText: '工率主檔' }).click();
+  await cleanPage.locator('.sys-switch .tab', { hasText: '電力電信設備' }).click();
+  await expect.poll(() =>
+    cleanPage.locator('input').evaluateAll((inputs) =>
+      inputs.map((input) => (input as HTMLInputElement).value),
+    ),
+  ).toContain(customName);
+  await cleanPage.close();
 });

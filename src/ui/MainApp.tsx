@@ -30,7 +30,7 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 export function MainApp() {
-  const { current, dirty, saveCurrent, saveCurrentWithReport, closeCase } = useAppStore();
+  const { current, master, dirty, saveCurrent, saveCurrentWithReport, closeCase } = useAppStore();
   const grand = useGrandTotalAll();
   const [tab, setTab] = useState<TabKey>('overview');
   const [jumpSys, setJumpSys] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export function MainApp() {
 
   function handleExport() {
     if (!current) return;
-    downloadText(suggestBackupFilename(current), exportCaseToJson(current));
+    downloadText(suggestBackupFilename(current), exportCaseToJson(current, master?.workItems ?? []));
   }
 
   async function handleSave() {
@@ -81,7 +81,7 @@ export function MainApp() {
         <button className="primary" onClick={handleSave}>
           {saved ? '已儲存 ✓' : '儲存'}
         </button>
-        <button onClick={handleExport}>匯出案件</button>
+        <button onClick={handleExport}>匯出完整備份</button>
         <button className="danger" onClick={() => setExiting(true)}>
           退出{dirty ? ' ●' : ''}
         </button>

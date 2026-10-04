@@ -31,6 +31,7 @@ import { indexMaster } from '../engine/calc';
 import { buildChangeReport, type ChangeReport } from '../domain/changeReport';
 import { migrateCode } from '../domain/codeMigration';
 import type { ParsedMaterial } from '../domain/materialCsv';
+import { analyzeCustomItemImport, type ImportedCaseBackup } from '../data/backup';
 
 let lineSeq = 0;
 function newLineId(): string {
@@ -77,7 +78,7 @@ interface AppState {
   /** 儲存並回傳「與上次存檔比對」的變更報告（供儲存時彈出報告視窗）。 */
   saveCurrentWithReport: () => Promise<ChangeReport | null>;
   createCase: (id: string, name: string) => Promise<void>;
-  importCase: (c: Case) => Promise<void>;
+  importBackup: (backup: ImportedCaseBackup, overwriteConflicts?: boolean) => Promise<void>;
   deleteCase: (id: string) => Promise<void>;
   seedSampleIfEmpty: () => Promise<void>;
   closeCase: () => void;
@@ -231,8 +232,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ current: fresh, dirty: false });
   },
 
-  async importCase(c) {
-    const { cases } = getRepositories();
+  async importBackup(backup, overwriteConflicts = false) {
+    const { cases, masters } = getRepositories();
+    const currentMaster = get().master;
+    if (!currentMaster) throw new Error('主檔尚未載入');
+    const plan = analyzeCustomItemImport(currentMaster.workItems, backup.customItems);
+    if (plan.conflicts.length > 0 && !overwriteConflicts) {
+      throw new Error(`有 ${plan.conflicts.length} 筆自訂工項與本機主檔衝突，尚未確認覆寫`);
+    }
+    const itemsToSave = [
+      ...plan.added,
+      ...(overwriteConflicts ? plan.conflicts.map(({ incoming }) => incoming) : []),
+    ];
+    if (itemsToSave.length > 0) await masters.saveWorkItems(itemsToSave);
+
+    const c = backup.case;
     // 若編號已存在，附加時間戳避免覆蓋既有案件。
     let id = c.id;
     if (await cases.exists(id)) id = `${c.id}-imported-${Date.now().toString(36)}`;
@@ -243,8 +257,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       updated: new Date().toISOString(),
     });
     await cases.save(restored);
+    const master = itemsToSave.length > 0 ? await masters.load() : currentMaster;
     await get().refreshList();
-    set({ current: restored, dirty: false });
+    set({ current: restored, master, dirty: false });
   },
 
   async deleteCase(id) {

@@ -41,6 +41,8 @@ export interface MasterRepository {
   load(): Promise<MasterData>;
   /** 新增/更新一筆自訂工項（upsert，依 code）。種子工項不由此寫入。 */
   saveWorkItem(item: WorkItem): Promise<void>;
+  /** 在同一個儲存交易中新增/更新多筆自訂工項（完整備份還原用）。 */
+  saveWorkItems(items: WorkItem[]): Promise<void>;
   /** 刪除一筆自訂工項。 */
   deleteWorkItem(code: string): Promise<void>;
 }

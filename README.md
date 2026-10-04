@@ -105,12 +105,13 @@ src/
 
 ## 怎麼備份
 
-單機版唯一安全的備份手段是**案件匯出 / 匯入**：
+單機版唯一安全的備份手段是**完整備份匯出 / 匯入**：
 
-- 匯出：`exportCaseToJson(case)` → 下載 `.json`（見 `src/data/backup.ts`）。
-- 匯入：讀入 `.json` → `importCaseFromJson(text)` 還原案件（含格式驗證）。
+- 匯出：`exportCaseToJson(case, workItems)` → 下載 v2 `.json`，包含案件及其實際引用的自訂工項（見 `src/data/backup.ts`）。
+- 匯入：讀入 `.json` → `importBackupFromJson(text)`；支援 v1 案件備份，v2 另還原自訂工項。
+- 衝突：匯入前列出自訂工項的新增／相同／衝突數量；只有明確確認後才覆寫同碼但內容不同的主檔。
 
-畫面階段會在案件閘門與主應用頂端提供「匯出案件 / 匯入備份」按鈕。
+案件閘門與主應用頂端分別提供「匯入案件備份（.json）」與「匯出完整備份」按鈕。
 
 ---
 

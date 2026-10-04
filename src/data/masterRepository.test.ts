@@ -64,4 +64,14 @@ describe('SeedMasterRepository 自訂工項合併', () => {
     const m = await repo.load();
     expect(m.workItems.filter((w) => !w.custom).length).toBe(3639);
   });
+
+  it('可在同一批次寫入多筆備份自訂工項', async () => {
+    await repo.saveWorkItems([
+      buildCustomWorkItem('U-0101', '備份工項 A'),
+      buildCustomWorkItem('U-0102', '備份工項 B'),
+    ]);
+    const m = await repo.load();
+    expect(m.workItems.find((w) => w.code === 'U-0101')?.custom).toBe(true);
+    expect(m.workItems.find((w) => w.code === 'U-0102')?.custom).toBe(true);
+  });
 });

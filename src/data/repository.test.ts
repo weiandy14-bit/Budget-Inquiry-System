@@ -9,8 +9,16 @@ import type { CaseRepository } from './repository';
 import { IdbCaseRepository } from './idb/IdbCaseRepository';
 import { MemoryCaseRepository } from './memory/MemoryCaseRepository';
 import { _resetDBForTest } from './idb/db';
-import { exportCaseToJson, importCaseFromJson } from './backup';
+import {
+  analyzeCustomItemImport,
+  exportCaseToJson,
+  importBackupFromJson,
+  importCaseFromJson,
+  referencedCustomItems,
+} from './backup';
 import { loadMasterData, buildFireSampleCase } from '../domain/seed';
+import { buildCustomWorkItem } from '../domain/workItems';
+import { indexMaster, totalCalc } from '../engine/calc';
 
 const master = loadMasterData();
 
@@ -88,5 +96,48 @@ describe('案件備份 匯出/匯入', () => {
   it('非本系統檔案應拒絕', () => {
     expect(() => importCaseFromJson('{"foo":1}')).toThrow();
     expect(() => importCaseFromJson('not json')).toThrow();
+  });
+
+  it('v2 只帶入案件實際引用的自訂工項', () => {
+    const c = makeCase('C-778', '完整備份');
+    const used = { ...buildCustomWorkItem('U-0001', '自訂管材'), rateMid: 1.25, refPrice: 100 };
+    const unused = buildCustomWorkItem('U-0002', '其他案件工項');
+    c.systems.fire = [{ ...c.systems.fire[0], code: used.code, qty: 3 }];
+
+    expect(referencedCustomItems(c, [...master.workItems, used, unused])).toEqual([used]);
+    const imported = importBackupFromJson(exportCaseToJson(c, [...master.workItems, used, unused]));
+    expect(imported.formatVersion).toBe(2);
+    expect(imported.customItems).toEqual([used]);
+
+    const before = totalCalc(c, indexMaster({ ...master, workItems: [...master.workItems, used] }));
+    const after = totalCalc(
+      imported.case,
+      indexMaster({ ...master, workItems: [...master.workItems, ...imported.customItems] }),
+    );
+    expect(after.grandSubtotal).toBe(before.grandSubtotal);
+    expect(after.totalWork).toBe(before.totalWork);
+  });
+
+  it('v1 備份可繼續匯入且自訂工項為空', () => {
+    const legacy = {
+      format: 'budget-case',
+      formatVersion: 1,
+      exportedAt: new Date().toISOString(),
+      case: makeCase('C-779', '舊版備份'),
+    };
+    const imported = importBackupFromJson(JSON.stringify(legacy));
+    expect(imported.formatVersion).toBe(1);
+    expect(imported.customItems).toEqual([]);
+  });
+
+  it('自訂工項匯入會區分新增、相同與衝突', () => {
+    const same = buildCustomWorkItem('U-0001', '相同');
+    const current = buildCustomWorkItem('U-0002', '本機版本');
+    const conflict = { ...current, name: '備份版本' };
+    const added = buildCustomWorkItem('U-0003', '新增');
+    const plan = analyzeCustomItemImport([same, current], [same, conflict, added]);
+    expect(plan.added.map((w) => w.code)).toEqual(['U-0003']);
+    expect(plan.identical.map((w) => w.code)).toEqual(['U-0001']);
+    expect(plan.conflicts.map((w) => w.incoming.code)).toEqual(['U-0002']);
   });
 });
