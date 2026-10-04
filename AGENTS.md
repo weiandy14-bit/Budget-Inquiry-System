@@ -104,20 +104,20 @@ src/
 
 ---
 
-## 目前已知待辦（接手起點，見 PR #62 `docs/TAKEOVER_PLAN.md`）
+## 目前已知待辦（見 `docs/TAKEOVER_PLAN.md`）
 
-- `npm audit`：3 moderate、2 high、1 critical — 盤點並升級相依套件。
-- GitHub Actions：Node.js 20 runtime 淘汰警告 — 升 CI runner。
-- 正式 bundle 約 970 kB（單檔）— 評估 code-split 或接受單檔取捨。
-- 文件基準校正（README／SKILL 的火警數字對齊 815.417 / 2,446,251）— PR #62 進行中。
+- Phase 1 技術盤點見 `docs/TECHNICAL_AUDIT.md`；相依安全報告已清為 0。
+- Bundle 決策見 `docs/BUNDLE_DECISION.md`；因自包含單檔需求暫不 code-split，以 1,800 kB 為成長上限。
+- Phase 2 優先補齊完整備份、嚴格匯入驗證與 IndexedDB 升級／復原測試。
 - 功能方向：其他大系統（電力／弱電／給排水／空調）目前僅空結構占位，待補子系統與工率資料。
 
 ---
 
 ## 當前狀態（接手基準點）
 
-- `main` 最新：`1525ec1`（= 線上版 Artifact Version 43 的內容）。
-- 測試：11 檔 / 107 tests 全綠；typecheck 綠。
+- `main` 接手基準：`a675a09`（PR #62）。
+- 測試：11 檔 / 107 tests、9 e2e 全綠；typecheck、build 綠。
+- 工具鏈：Node.js 22；Vite 6.4.3、Vitest 4.1.11；GitHub Actions 使用 Node 24 runtime 的 v7 actions。
 - 線上展示連結由專案擁有者保管；更新方式見「資料與上線」。
 
 有疑問且無法從程式碼或上述文件得到答案時，向專案擁有者確認，不要臆測後硬改核心邏輯。

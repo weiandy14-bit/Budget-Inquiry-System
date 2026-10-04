@@ -20,10 +20,10 @@
 - [x] 型別檢查：`npm run typecheck` 通過。
 - [x] 正式建置：`npm run build` 通過。
 - [x] 瀏覽器 E2E：9 項測試全數通過。
-- [ ] 處理相依套件安全報告：目前 3 moderate、2 high、1 critical。
-- [ ] 處理 CI 的 Node.js 20 Actions runtime 淘汰警告。
-- [ ] 評估正式 bundle 約 970 kB 的拆分需求。
-- [ ] 完成功能、資料模型、備份與復原的技術盤點報告。
+- [x] 處理相依套件安全報告：Vite 6.4.3、Vitest 4.1.11，`npm audit` 為 0。
+- [x] 處理 CI 的 Node.js 20 Actions runtime 淘汰警告：Actions v7（Node 24 runtime）＋測試 Node 22。
+- [x] 評估 bundle 拆分需求：維持自包含單檔，設定 1,800 kB 成長上限，見 `BUNDLE_DECISION.md`。
+- [x] 完成功能、資料模型、備份與復原的技術盤點報告，見 `TECHNICAL_AUDIT.md`。
 
 ## Phase 2：計算與資料安全
 
@@ -63,7 +63,8 @@ npm test          11 files / 107 tests passed
 npm run typecheck passed
 npm run build     passed
 npm run test:e2e  9 tests passed
+npm audit         0 vulnerabilities
 ```
 
-已知非阻斷警告：正式 bundle 超過 Vite 500 kB 建議值；GitHub Actions 使用的 Node.js 20 runtime 已進入淘汰流程。
+正式 JS 為 1,720,608 bytes（gzip 183.73 kB），自包含 artifact 為 1,724,614 bytes；主要來源是 2,190,538 bytes 的種子主檔。現階段接受單檔取捨並以 1,800 kB 監控成長。
 

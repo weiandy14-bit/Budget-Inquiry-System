@@ -107,7 +107,7 @@ npm run test:e2e   # Playwright（本機首次需 npx playwright install chromiu
 ## 工作流程守則（本專案特有，務必遵守）
 
 - **push 一律等使用者明確說「推上去」才推**；在那之前只在本機開發、commit。
-- 開發分支：`claude/budget-system-dev-2exmd1`；base 為 `main`（PR #1，維持 draft 直到使用者要合併）。
+- 從最新 `main` 建立 `codex/<簡述>` 分支；PR 一律以 `main` 為 base，合併由專案擁有者決定。
 - 每次 push 會觸發外部 `ecc-tools[bot]` 自動開一個無關的 agent 設定 PR — 已約定**靜默關閉**，
   不逐一通知使用者（治本是請使用者移除該 GitHub App）。
 - 線上展示（自包含單檔 Artifact）：把 `dist` 的 JS/CSS 內聯成單檔發佈，見 `references/dev-notes.md`。

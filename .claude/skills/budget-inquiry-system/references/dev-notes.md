@@ -38,9 +38,8 @@ IndexedDB 在 Artifact 頁面可用；若被沙箱擋，考慮加「IndexedDB �
 ## 專案工作流程守則
 
 - **push 只在使用者說「推上去」時做**。其餘時間停在「已 commit、等指示」。
-- 開發分支 `claude/budget-system-dev-2exmd1` → PR #1 合進 `main`，維持 **draft** 直到使用者要合併。
-  （draft 差別：不能按 Merge、不通知 reviewer；轉 ready 才能合。）
-- 訂閱了 PR #1 活動；若 CI 紅 → drive-to-green（診斷 job log、修、推）。
+- 從最新 `main` 建立 `codex/<簡述>` 分支；PR 以 `main` 為 base，由專案擁有者決定合併。
+- 若 CI 紅 → drive-to-green（診斷 job log、修、推）。
 - **ecc-tools[bot]**：每次 push 後自動開一個塞 `.claude/.agents/.codex` 設定的無關 PR。
   已與使用者約定**靜默關閉**（`update_pull_request state=closed`），不逐一通知。治本＝移除該 App。
 - 使用者慣用**繁體中文**溝通。
@@ -48,7 +47,6 @@ IndexedDB 在 Artifact 頁面可用；若被沙箱擋，考慮加「IndexedDB �
 ## 目前狀態快照（會隨進度變動，僅供接手參考）
 
 - 已交付：專案骨架 + Repository 抽象層、計算引擎（火警驗收通過）、資料模型、
-  7 分頁畫面、大系統兩層導覽、e2e、CI。單元 31 + e2e 2 全綠。
-- PR #1（draft，CI 綠）：https://github.com/weiandy14-bit/Budget-Inquiry-System/pull/1
-- 待使用者決定：把 `main` 設預設分支、移除 ecc-tools App、PR 轉 ready 合併。
-- 後續候選：電力/弱電工率結構、CSD 匯出、其他頁面調整。
+  7 分頁畫面、大系統兩層導覽、e2e、CI。單元 107 + e2e 9 全綠。
+- `main` 接手基準：`a675a09`；預設分支與保護規則已設定。
+- Phase 1 技術盤點見 `docs/TECHNICAL_AUDIT.md`；後續先處理備份、匯入驗證與 IndexedDB 復原。
