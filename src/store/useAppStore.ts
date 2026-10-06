@@ -70,7 +70,9 @@ interface AppState {
   /** 目前選中的大系統鍵（UI 狀態，系統明細/總表共用）。 */
   bigKey: string;
 
-  init: () => Promise<void>;
+  init: () => Promise<boolean>;
+  /** 使用者確認後刪除損壞的本機資料庫；呼叫端負責再次初始化。 */
+  resetLocalData: () => Promise<boolean>;
   setBigKey: (bigKey: string) => void;
   refreshList: () => Promise<void>;
   openCase: (id: string) => Promise<void>;
@@ -162,8 +164,24 @@ export const useAppStore = create<AppState>((set, get) => ({
       const master = await masters.load();
       set({ master });
       await get().refreshList();
+      return true;
     } catch (e) {
       set({ error: (e as Error).message });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  async resetLocalData() {
+    set({ loading: true });
+    try {
+      await getRepositories().reset();
+      set({ master: null, caseList: [], current: null, error: null, dirty: false });
+      return true;
+    } catch (e) {
+      set({ error: `無法重建本機資料庫：${(e as Error).message}` });
+      return false;
     } finally {
       set({ loading: false });
     }

@@ -212,3 +212,40 @@ test('完整備份 v2：匯出案件引用的自訂工項，並可在全新瀏�
   ).toContain(customName);
   await cleanPage.close();
 });
+
+test('IndexedDB 損壞時顯示復原流程，確認後可重建最新資料庫', async ({ page }) => {
+  await page.route('**/db-fixture', (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>fixture</title>' }),
+  );
+  await page.goto('/db-fixture');
+  await page.evaluate(() => new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open('budget-inquiry-system', 2);
+    request.onupgradeneeded = () => {
+      const cases = request.result.createObjectStore('cases', { keyPath: 'id' });
+      cases.createIndex('by-updated', 'updated');
+      request.result.createObjectStore('meta');
+    };
+    request.onsuccess = () => {
+      request.result.close();
+      resolve();
+    };
+    request.onerror = () => reject(request.error);
+  }));
+  await page.unroute('**/db-fixture');
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: '無法開啟本機資料' })).toBeVisible();
+  await expect(page.getByText('無法讀取本機自訂工項資料')).toBeVisible();
+
+  let warning = '';
+  page.once('dialog', async (dialog) => {
+    warning = dialog.message();
+    await dialog.accept();
+  });
+  await page.getByRole('button', { name: '重建本機資料庫（清除資料）' }).click();
+
+  await expect(page.getByRole('heading', { name: '機電工程預算編制系統' })).toBeVisible();
+  await expect(page.getByText('火警範例案（驗證基準）').first()).toBeVisible();
+  expect(warning).toContain('永久刪除本瀏覽器內的所有案件與自訂工項');
+  expect(warning).toContain('已保留 JSON 備份');
+});

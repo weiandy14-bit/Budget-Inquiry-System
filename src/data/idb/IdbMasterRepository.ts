@@ -31,14 +31,15 @@ export class SeedMasterRepository implements MasterRepository {
     return { ...base, workItems: [...merged, ...appended] };
   }
 
-  /** 讀取自訂工項；IndexedDB 不可用時（如被沙箱擋）退回空陣列，不讓載入失敗。 */
+  /** 讀取自訂工項；讀取失敗必須可見，不能偽裝成「沒有自訂資料」。 */
   private async readCustom(): Promise<WorkItem[]> {
     try {
       const db = await getDB();
       const all = await db.getAll('customItems');
       return all.map((w) => ({ ...w, custom: true }));
-    } catch {
-      return [];
+    } catch (error) {
+      const detail = error instanceof Error ? `（${error.message}）` : '';
+      throw new Error(`無法讀取本機自訂工項資料${detail}。資料未被清除，請重試或使用資料復原流程。`);
     }
   }
 

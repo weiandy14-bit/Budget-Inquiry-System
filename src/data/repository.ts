@@ -51,4 +51,6 @@ export interface MasterRepository {
 export interface Repositories {
   cases: CaseRepository;
   masters: MasterRepository;
+  /** 清除目前資料來源的使用者資料；只可由明確的復原確認流程呼叫。 */
+  reset(): Promise<void>;
 }
