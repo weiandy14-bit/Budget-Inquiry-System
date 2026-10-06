@@ -28,4 +28,5 @@ const html =
 
 const out = 'dist/budget-system-app.html';
 writeFileSync(out, html);
-console.log(`已產出線上版單檔：${out}（${(html.length / 1024).toFixed(0)} KB）`);
+const sizeKiB = Buffer.byteLength(html, 'utf8') / 1024;
+console.log(`已產出線上版單檔：${out}（${sizeKiB.toFixed(0)} KiB）`);

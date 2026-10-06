@@ -1,11 +1,11 @@
 /** 案件選擇閘門（規格 §5.1）：列出案件、建新案、匯入備份。 */
 import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { importCaseFromJson } from '../data/backup';
+import { analyzeCustomItemImport, importBackupFromJson } from '../data/backup';
 import { pickTextFile } from './download';
 
 export function CaseGate() {
-  const { caseList, openCase, createCase, importCase, deleteCase } = useAppStore();
+  const { master, caseList, openCase, createCase, importBackup, deleteCase } = useAppStore();
   const [id, setId] = useState('');
   const [name, setName] = useState('');
   const [err, setErr] = useState<string | null>(null);
@@ -28,8 +28,17 @@ export function CaseGate() {
     const text = await pickTextFile('.json');
     if (!text) return;
     try {
-      const c = importCaseFromJson(text);
-      await importCase(c);
+      if (!master) throw new Error('主檔尚未載入');
+      const backup = importBackupFromJson(text);
+      const plan = analyzeCustomItemImport(master.workItems, backup.customItems);
+      const summary = [
+        `備份版本：v${backup.formatVersion}`,
+        `案件：${backup.case.id} ${backup.case.name}`,
+        `自訂工項：新增 ${plan.added.length}、相同 ${plan.identical.length}、衝突 ${plan.conflicts.length}`,
+        plan.conflicts.length > 0 ? '繼續將以備份內容覆寫衝突的本機自訂工項。' : '確認匯入此備份？',
+      ].join('\n');
+      if (!window.confirm(summary)) return;
+      await importBackup(backup, plan.conflicts.length > 0);
     } catch (e) {
       setErr(`匯入失敗：${(e as Error).message}`);
     }

@@ -7,6 +7,8 @@ import { defineConfig } from '@playwright/test';
  *   PW_NO_SANDBOX=1 於容器內停用 sandbox。
  */
 const executablePath = process.env.PW_CHROMIUM_PATH || undefined;
+const port = Number(process.env.PW_PORT || 5174);
+const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -14,7 +16,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL,
     browserName: 'chromium',
     viewport: { width: 1280, height: 900 },
     launchOptions: {
@@ -23,9 +25,9 @@ export default defineConfig({
     },
   },
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: `npm run dev -- --port ${port} --strictPort`,
+    url: baseURL,
+    reuseExistingServer: false,
     timeout: 60_000,
   },
 });

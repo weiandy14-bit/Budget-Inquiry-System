@@ -9,6 +9,7 @@
 import type { Repositories } from './repository';
 import { IdbCaseRepository } from './idb/IdbCaseRepository';
 import { SeedMasterRepository } from './idb/IdbMasterRepository';
+import { resetLocalDatabase } from './idb/db';
 
 let repos: Repositories | null = null;
 
@@ -17,6 +18,7 @@ export function getRepositories(): Repositories {
     repos = {
       cases: new IdbCaseRepository(),
       masters: new SeedMasterRepository(),
+      reset: resetLocalDatabase,
     };
   }
   return repos;
