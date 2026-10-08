@@ -39,6 +39,9 @@ dist/budget-system-app.html
 
 把這個檔發佈到 Artifact（線上展示）即可；它不依賴任何外部檔案。
 
+正式發布候選請改跑 `npm run release:verify`，它會連續建置兩次並核對 SHA-256、單檔結構、版本、
+1,800 KiB 大小上限與 `dist/release-manifest.json`。完整步驟見 `RELEASE.md`。
+
 ## 四、常見維護點
 
 | 想改的東西 | 改哪裡 |

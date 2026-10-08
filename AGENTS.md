@@ -109,13 +109,14 @@ src/
 - Phase 1 技術盤點見 `docs/TECHNICAL_AUDIT.md`；相依安全報告已清為 0。
 - Bundle 決策見 `docs/BUNDLE_DECISION.md`；因自包含單檔需求暫不 code-split，以 1,800 kB 為成長上限。
 - Phase 2 已完成：包含 v2 完整備份、嚴格匯入驗證、IndexedDB 升級／復原、里程碑紀錄、統一整元結算與內部黃金測試。因沒有業主正式預算書，黃金資料僅供回歸，不代表外部驗收。
+- Phase 3.1 已建立 `CHANGELOG.md`、正式發布流程與可重現單檔驗證；下一步為 Chrome／Edge、離線操作及資料保留驗收。
 - 功能方向：其他大系統（電力／弱電／給排水／空調）目前僅空結構占位，待補子系統與工率資料。
 
 ---
 
 ## 當前狀態（接手基準點）
 
-- `main` 接手基準：`16baa9a`（PR #65）。
+- `main` 接手基準：`9d59716`（PR #66）。
 - 測試：14 檔 / 134 tests、12 e2e 全綠；typecheck、build 綠。
 - 工具鏈：Node.js 22；Vite 6.4.3、Vitest 4.1.11；GitHub Actions 使用 Node 24 runtime 的 v7 actions。
 - 線上展示連結由專案擁有者保管；更新方式見「資料與上線」。

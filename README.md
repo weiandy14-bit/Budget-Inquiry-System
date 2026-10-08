@@ -28,6 +28,7 @@ npm run dev        # 開發伺服器
 npm test           # 執行單元測試（含火警範例案驗收）
 npm run build      # 產出 dist/ 靜態檔
 npm run preview    # 預覽 build 結果
+npm run release:verify # 正式發布候選：完整測試 + 兩次建置雜湊比對
 
 # 端對端測試（瀏覽器流程）
 npx playwright install chromium   # 首次需下載瀏覽器
@@ -38,6 +39,9 @@ npm run test:e2e                  # 自動起 dev server 並跑 e2e/app.spec.ts
 
 `npm run build` 後的 `dist/` 為純靜態檔（vite base 設為相對路徑），可用任何本機 server
 開啟；打包已為單機部署最佳化。
+
+正式發布的版本命名、可重現產物、SHA-256 清單與回退流程見 `docs/RELEASE.md`；版本變更記錄見
+`CHANGELOG.md`。
 
 ---
 

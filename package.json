@@ -16,7 +16,9 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc -b --noEmit",
     "check": "vitest run && tsc -b --noEmit",
-    "artifact": "npm run build && node scripts/build-artifact.mjs"
+    "artifact": "npm run build && node scripts/build-artifact.mjs",
+    "artifact:check": "node scripts/verify-artifact.mjs",
+    "release:verify": "npm run check && npm run test:e2e && node scripts/verify-reproducible-release.mjs"
   },
   "dependencies": {
     "idb": "^8.0.0",
