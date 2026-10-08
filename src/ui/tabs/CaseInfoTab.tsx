@@ -1,10 +1,10 @@
-/** 案件資訊（規格 §5.4）：基本資料 + 版本紀錄 + 存新版本。 */
+/** 案件資訊（規格 §5.4）：基本資料 + 僅供稽核的里程碑紀錄。 */
 import { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 
 export function CaseInfoTab() {
   const current = useAppStore((s) => s.current);
-  const { patchCase, saveNewVersion } = useAppStore();
+  const { patchCase, addMilestoneRecord } = useAppStore();
   const [memo, setMemo] = useState('');
   if (!current) return null;
 
@@ -25,10 +25,11 @@ export function CaseInfoTab() {
       </div>
 
       <div className="card">
-        <h2>版本紀錄（目前 v{current.version}）</h2>
+        <h2>里程碑紀錄（目前 v{current.version}）</h2>
+        <p className="muted">僅記錄當下的版本號、時間與備註，不保存案件內容，也無法還原歷史版本。</p>
         <div className="row" style={{ marginBottom: 12 }}>
           <input
-            placeholder="版本備註（例：業主審查前）"
+            placeholder="里程碑備註（例：送業主審查）"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             style={{ flex: 1 }}
@@ -36,11 +37,11 @@ export function CaseInfoTab() {
           <button
             className="primary"
             onClick={() => {
-              void saveNewVersion(memo);
+              void addMilestoneRecord(memo);
               setMemo('');
             }}
           >
-            存新版本
+            新增里程碑紀錄
           </button>
         </div>
         <div className="table-scroll">
