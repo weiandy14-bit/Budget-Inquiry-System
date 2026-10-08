@@ -16,7 +16,7 @@
 ## Phase 1：技術盤點
 
 - [x] 乾淨安裝：`npm ci`。
-- [x] 單元測試：12 個測試檔、129 項測試全數通過。
+- [x] 單元測試：14 個測試檔、134 項測試全數通過。
 - [x] 型別檢查：`npm run typecheck` 通過。
 - [x] 正式建置：`npm run build` 通過。
 - [x] 瀏覽器 E2E：12 項測試全數通過。
@@ -27,8 +27,8 @@
 
 ## Phase 2：計算與資料安全
 
-- [ ] 定義金額、單價、比例與總表尾差的統一捨入規則。
-- [ ] 取得業主確認的正式預算書，建立黃金測試資料。
+- [x] 定義金額、單價、比例與總表尾差的統一捨入規則，見 `ROUNDING_POLICY.md`。
+- [x] 因無業主確認的正式預算書，改以火警及華泰範例建立內部回歸黃金資料；明確標示未經外部預算書驗收。
 - [x] 將案件引用的自訂主檔納入 v2 完整備份；匯入前提示新增／相同／衝突數量，衝突須明確確認覆寫。
 - [x] 嚴格驗證備份版本與逐層資料結構；錯誤訊息包含欄位路徑，v1 舊欄位仍可安全補值。
 - [x] 以真實 v1 fixture 驗證 IndexedDB 升級；讀取失敗明確可見，並提供有備份警告與二次確認的重建流程。
@@ -60,7 +60,7 @@
 執行環境：Node.js 22.22.3、npm 10.9.8。
 
 ```text
-npm test          12 files / 129 tests passed
+npm test          14 files / 134 tests passed
 npm run typecheck passed
 npm run build     passed
 npm run test:e2e  12 tests passed

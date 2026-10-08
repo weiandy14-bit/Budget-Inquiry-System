@@ -21,6 +21,7 @@ import type {
   Tier,
   WorkItem,
 } from '../domain/types';
+import { roundMoney } from '../domain/rounding';
 
 /** 主檔索引（O(1) 查表），由 MasterData 建立一次後重複使用。 */
 export interface MasterIndex {
@@ -145,8 +146,8 @@ export function calcRow(
 
   // 設備：材料含安裝工，工資不計入單價（但工率仍記錄供檢核）。
   // 配管/配線：單價含工資。
-  const unit_ = isEq ? matPrice * disc : matPrice * disc + laborUnit;
-  const total = qty * unit_;
+  const unit_ = roundMoney(isEq ? matPrice * disc : matPrice * disc + laborUnit);
+  const total = roundMoney(qty * unit_);
 
   return {
     lineId: line.id,
@@ -266,12 +267,18 @@ export function sysCalc(c: Case, sysKey: string, index: MasterIndex): SystemResu
   result.derived = index.derivedRules.map((rule) => {
     const ratio = c.derived[rule.name] ?? rule.ratio;
     const baseAmount = baseAmountFor(rule.base, result);
-    return { name: rule.name, base: rule.base, ratio, baseAmount, amount: baseAmount * ratio };
+    return {
+      name: rule.name,
+      base: rule.base,
+      ratio,
+      baseAmount,
+      amount: roundMoney(baseAmount * ratio),
+    };
   });
 
   const derivedSum = result.derived.reduce((s, d) => s + d.amount, 0);
   result.systemSubtotal = phys + derivedSum;
-  result.labor = result.totalWork * c.wage;
+  result.labor = roundMoney(result.totalWork * c.wage);
   return result;
 }
 

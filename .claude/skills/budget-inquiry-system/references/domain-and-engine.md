@@ -18,8 +18,8 @@ calcRow(case, sysKey, line, index):
   isEq   = item.grp === '設備'
   disc   = line.disc ?? (isEq ? case.disc : 1)      # 非設備折數預設 1
   laborUnit = rate * case.wage
-  unit   = isEq ? matPrice*disc : matPrice*disc + laborUnit   # 設備工資不入單價
-  total  = qty * unit
+  unit   = roundMoney(isEq ? matPrice*disc : matPrice*disc + laborUnit)  # 整元；設備工資不入單價
+  total  = roundMoney(qty * unit)                                      # 整元
 
 sysCalc(case, sysKey, index):
   逐列 calcRow，累加：
@@ -28,14 +28,16 @@ sysCalc(case, sysKey, index):
     eqTotal/pipeTotal/wireTotal（各群組 total 合計，供衍生基數）
   衍生 = 對每條 DerivedRule：ratio = case.derived[name] ?? rule.ratio；
          baseAmount = {設備→eqTotal, 管材→pipeTotal, 電線→wireTotal, 實體→phys}[rule.base]；
-         amount = baseAmount * ratio
+         amount = roundMoney(baseAmount * ratio)
   systemSubtotal = phys + Σ衍生
   totalWork = eqWork+pipeWork+wireWork
-  labor     = totalWork * case.wage          # 工資是跨三群組彙總（含設備），與單價分離
+  labor     = roundMoney(totalWork * case.wage)  # 工資是跨三群組彙總（含設備），與單價分離
 
 totalCalc(case, index, keys?):
   對每個子系統 sysCalc，grandSubtotal = Σ systemSubtotal，並彙總 totalWork / totalLabor
 ```
+
+金額在單價、複價、衍生費用與工資各自的結算點四捨五入至整元；工率、工數與比率保留原始精度。系統小計與總表只加總已結算金額，因此不另產生人工尾差。完整決策與內部黃金基準見 `docs/ROUNDING_POLICY.md`。
 
 ## 為什麼驗收數字對得上（關鍵推導）
 
