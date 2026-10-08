@@ -5,6 +5,7 @@
  * 依明細列穩定 id 配對，判斷新增/刪除/修改。金額以計算引擎即時算（各自案件情境）。
  */
 import type { Case, LineItem, MasterData } from './types';
+import { roundMoney } from './rounding';
 import { calcRow, sysCalc, type MasterIndex } from '../engine/calc';
 import { allSubsystems } from './bigSystems';
 
@@ -51,7 +52,7 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 function money(n: number): string {
-  return Number.isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—';
+  return Number.isFinite(n) ? roundMoney(n).toLocaleString('en-US') : '—';
 }
 
 function fmt(v: unknown): string {

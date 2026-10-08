@@ -35,6 +35,20 @@ test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) 
   await expect(page.getByRole('heading', { name: '變更報告' })).toHaveCount(0);
 });
 
+test('案件里程碑僅供稽核，新增紀錄時明示無法還原', async ({ page }) => {
+  await openSampleCase(page);
+  await page.locator('.tab', { hasText: '案件資訊' }).click();
+
+  await expect(page.getByRole('heading', { name: '里程碑紀錄（目前 v1）' })).toBeVisible();
+  await expect(page.getByText('不保存案件內容，也無法還原歷史版本')).toBeVisible();
+
+  await page.getByPlaceholder('里程碑備註（例：送業主審查）').fill('送業主審查');
+  await page.getByRole('button', { name: '新增里程碑紀錄' }).click();
+
+  await expect(page.getByRole('heading', { name: '里程碑紀錄（目前 v2）' })).toBeVisible();
+  await expect(page.getByText('送業主審查')).toBeVisible();
+});
+
 test('整合標單：切換後顯示標單、列印鈕與工資列', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '整合標單' }).click();

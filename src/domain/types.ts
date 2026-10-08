@@ -156,7 +156,10 @@ export interface MasterData {
 
 // ─── 案件資料（每案一份，存 IndexedDB）────────────────────────
 
-/** 版本紀錄 */
+/**
+ * 案件里程碑紀錄。
+ * 僅保存版本號、時間與備註，不包含案件內容快照，因此不能用來還原歷史內容。
+ */
 export interface VersionRecord {
   v: number;
   date: string; // ISO 字串
@@ -198,8 +201,8 @@ export interface Case {
   ownerName: string; // 編製人
   created: string; // 建立時間 ISO
   updated: string; // 最後更新 ISO
-  version: number; // 目前版本
-  versions: VersionRecord[]; // 版本紀錄
+  version: number; // 目前里程碑編號
+  versions: VersionRecord[]; // 里程碑紀錄（僅稽核標記，不含可還原快照）
   wage: number; // 本案綜合日工價（預設 4475）
   disc: number; // 本案發包折數（預設 0.85）
   /** 各系統統一檔位 { sysKey: Tier } */

@@ -34,6 +34,7 @@ src/
   domain/
     types.ts        領域型別（WorkItem / QuantityRule / DerivedRule / Case / LineItem / Tier …）
     seed.ts         seed_data.json 解析為 MasterData；buildFireSampleCase() 建驗證用範例案
+    rounding.ts     金額結算規則（單價／複價／衍生費用／工資四捨五入至整元）
     bigSystems.ts   五大系統登錄表 + 子系統輔助（subsystemsForBig / allSubsystems / nextCustomKey）
   seed/seed_data.json  ★ 已驗證種子資料（工率表 + 材料參考價）。不要 hardcode、不要自行編工率
   engine/

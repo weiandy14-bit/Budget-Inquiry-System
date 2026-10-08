@@ -98,7 +98,8 @@ interface AppState {
   updateLine: (sysKey: string, lineId: string, patch: Partial<LineItem>) => void;
   removeLine: (sysKey: string, lineId: string) => void;
   addCustomSystem: (name: string) => void;
-  saveNewVersion: (memo: string) => Promise<void>;
+  /** 新增僅供稽核的里程碑紀錄；不保存案件內容快照，無法還原。 */
+  addMilestoneRecord: (memo: string) => Promise<void>;
 
   // ── 全域主檔：使用者自訂工項（跨案共用，持久化於 IndexedDB）──
   /** 以名稱新增一筆自訂工項（自動配碼，附加於末尾），寫入主檔並回傳；opts 帶入群組／材料分類／單位。 */
@@ -399,7 +400,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
-  async saveNewVersion(memo) {
+  async addMilestoneRecord(memo) {
     const cur = get().current;
     if (!cur) return;
     const now = new Date().toISOString();
@@ -407,7 +408,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const updated: Case = {
       ...cur,
       version: v,
-      versions: [...cur.versions, { v, date: now, memo: memo || `版本 ${v}` }],
+      versions: [...cur.versions, { v, date: now, memo: memo || `里程碑 ${v}` }],
       updated: now,
     };
     set({ current: updated, dirty: false });
