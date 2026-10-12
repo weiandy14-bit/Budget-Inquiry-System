@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-12
+
 ### 新增
 
 - 完整案件備份 v2，包含案件引用的自訂工項、匯入預覽與衝突確認。
@@ -23,6 +25,7 @@
 
 ### 安全性
 
-- 更新 Vite 及 Vitest；目前 `npm audit` 為 0 個已知弱點。
+- 更新 Vite、Vitest 及 `source-map-js` 1.2.2；目前 `npm audit` 為 0 個已知弱點。
 
-[Unreleased]: https://github.com/weiandy14-bit/Budget-Inquiry-System/compare/main...HEAD
+[Unreleased]: https://github.com/weiandy14-bit/Budget-Inquiry-System/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/weiandy14-bit/Budget-Inquiry-System/tree/v0.1.0
