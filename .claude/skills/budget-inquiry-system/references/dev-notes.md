@@ -47,6 +47,10 @@ IndexedDB 在 Artifact 頁面可用；若被沙箱擋，考慮加「IndexedDB �
 ## 目前狀態快照（會隨進度變動，僅供接手參考）
 
 - 已交付：專案骨架 + Repository 抽象層、計算引擎（火警驗收通過）、資料模型、
-  7 分頁畫面、大系統兩層導覽、完整備份與 IndexedDB 復原。單元 134 + e2e 12 全綠。
-- `main` 接手基準：`16baa9a`（PR #65）；預設分支與保護規則已設定。
-- Phase 2 已完成；金額採整元結算並以火警／華泰範例建立內部黃金基準。因沒有業主正式預算書，此基準不代表外部驗收。下一步進入 Phase 3 正式單機版發布。
+  7 分頁畫面、大系統兩層導覽、完整備份與 IndexedDB 復原。單元 138 + e2e 13 全綠。
+- `main` 接手基準：`9d59716`（PR #66）；預設分支與保護規則已設定。
+- Phase 2 已完成；金額採整元結算並以火警／華泰範例建立內部黃金基準。因沒有業主正式預算書，此基準不代表外部驗收。
+- Phase 3.1 已建立版本／變更紀錄規則與可重現 Release artifact；`npm run release:verify` 會執行完整檢查、E2E、兩次建置雜湊比對及單檔驗證。
+- Phase 3.2 已用正式 Chrome／Edge 通道驗證自包含單檔、離線修改／保存／重新載入及 IndexedDB 跨瀏覽器重啟保存；執行 `npm run release:browsers` 可重現，證據見 `docs/BROWSER_RELEASE_VERIFICATION.md`。
+- Phase 3.3 已加入應用程式內使用說明、每案最後備份時間／7 天提醒、刪除前備份狀態及可測試的錯誤復原說明；詳細操作見 `docs/USER_GUIDE.md`。
+- Phase 3.4 已決定採限定內部使用的自包含單檔，不建立公開網站或公開下載；固定位置更新、存取與回退規則見 `docs/DEPLOYMENT_DECISION.md`。Phase 3 開發與驗收完成，待分支推送、PR／CI、合併後依流程建立正式 `v0.1.0`。

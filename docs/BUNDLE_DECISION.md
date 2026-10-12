@@ -13,9 +13,9 @@
 | 項目 | 大小 |
 |---|---:|
 | `src/seed/seed_data.json` | 2,190,538 bytes（2,139.20 KiB） |
-| 正式 JS | 1,720,608 bytes（1,680.28 KiB） |
-| 正式 JS gzip | 183.73 kB |
-| 自包含 `budget-system-app.html` | 1,724,614 bytes（1,684.19 KiB） |
+| 正式 JS | 1,732,602 bytes（1,692.00 KiB） |
+| 正式 JS gzip | 187.90 kB |
+| 自包含 `budget-system-app.html` | 1,736,853 bytes（1,696.15 KiB） |
 
 種子主檔含 3,639 筆工項，是 bundle 的主要來源；應用程式碼不是主要體積來源。Vite 對大型 JSON 採 `JSON.parse` 載入，未壓縮體積較舊版輸出大，但 gzip 後仍約 184 kB。
 
@@ -27,6 +27,6 @@
 
 ## 監控條件
 
-- CI build 超過 1,800 kB 應重新檢查主檔成長。
+- CI build 超過 1,800 KiB 會直接讓 Release artifact 驗證失敗，並應重新檢查主檔成長。
 - Release 前記錄 Chrome／Edge 冷啟動時間與記憶體。
 - 未來若改為一般網站部署，可優先評估把種子主檔改成可快取的獨立資源；若仍需單檔，則維持內聯。

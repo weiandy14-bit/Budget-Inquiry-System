@@ -28,6 +28,8 @@ npm run dev        # 開發伺服器
 npm test           # 執行單元測試（含火警範例案驗收）
 npm run build      # 產出 dist/ 靜態檔
 npm run preview    # 預覽 build 結果
+npm run release:verify # 正式發布候選：完整測試 + 兩次建置雜湊比對
+npm run release:browsers # 正式 Chrome／Edge：離線操作 + IndexedDB 重啟保存
 
 # 端對端測試（瀏覽器流程）
 npx playwright install chromium   # 首次需下載瀏覽器
@@ -38,6 +40,10 @@ npm run test:e2e                  # 自動起 dev server 並跑 e2e/app.spec.ts
 
 `npm run build` 後的 `dist/` 為純靜態檔（vite base 設為相對路徑），可用任何本機 server
 開啟；打包已為單機部署最佳化。
+
+正式發布的版本命名、可重現產物、SHA-256 清單與回退流程見 `docs/RELEASE.md`；內部限定部署與
+存取決策見 `docs/DEPLOYMENT_DECISION.md`；版本變更記錄見 `CHANGELOG.md`。實際操作、備份、搬移及
+錯誤復原步驟見 `docs/USER_GUIDE.md`。
 
 ---
 
@@ -115,6 +121,7 @@ src/
 - 驗證：不支援版本、錯誤數值／檔位／系統鍵、重複 id 或不完整自訂工項會在寫入資料庫前拒絕，並指出錯誤欄位。
 
 案件閘門與主應用頂端分別提供「匯入案件備份（.json）」與「匯出完整備份」按鈕。
+系統會記錄每個案件在目前瀏覽器的最後備份時間；從未備份或超過 7 天時顯示提醒，刪除案件前也會顯示備份狀態。
 
 ### 本機資料庫損壞時
 

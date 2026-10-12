@@ -35,6 +35,35 @@ test('儲存時彈出變更報告視窗，可下載並關閉', async ({ page }) 
   await expect(page.getByRole('heading', { name: '變更報告' })).toHaveCount(0);
 });
 
+test('使用說明、備份提醒與刪除前備份狀態可見', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '使用說明' }).click();
+  await expect(page.getByRole('heading', { name: '使用說明與資料安全' })).toBeVisible();
+  await expect(page.getByText('案件只存在目前瀏覽器的 IndexedDB')).toBeVisible();
+  await expect(page.getByText('只有已有備份或確定放棄資料時')).toBeVisible();
+  await page.getByRole('button', { name: '關閉' }).click();
+
+  await page.getByText('火警範例案（驗證基準）').first().click();
+  await expect(page.locator('.backup-reminder')).toContainText('尚未備份');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: '匯出完整備份' }).click();
+  await downloadPromise;
+  await expect(page.locator('.backup-reminder')).toContainText('上次備份：');
+  await expect(page.locator('.backup-reminder')).toContainText('完整備份已匯出');
+
+  await page.reload();
+  const sampleRow = page.getByRole('row').filter({ hasText: '火警範例案（驗證基準）' });
+  await expect(sampleRow).toContainText('上次備份：');
+  let deleteWarning = '';
+  page.once('dialog', async (dialog) => {
+    deleteWarning = dialog.message();
+    await dialog.dismiss();
+  });
+  await sampleRow.getByRole('button', { name: '刪除' }).click();
+  expect(deleteWarning).toContain('本機紀錄：上次備份：');
+  expect(deleteWarning).toContain('此動作無法復原');
+});
+
 test('案件里程碑僅供稽核，新增紀錄時明示無法還原', async ({ page }) => {
   await openSampleCase(page);
   await page.locator('.tab', { hasText: '案件資訊' }).click();
@@ -250,6 +279,8 @@ test('IndexedDB 損壞時顯示復原流程，確認後可重建最新資料庫'
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '無法開啟本機資料' })).toBeVisible();
   await expect(page.getByText('無法讀取本機自訂工項資料')).toBeVisible();
+  await expect(page.getByText('關閉其他仍開啟本系統的舊分頁')).toBeVisible();
+  await expect(page.getByText('只有已有備份或確定放棄資料時')).toBeVisible();
 
   let warning = '';
   page.once('dialog', async (dialog) => {

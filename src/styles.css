@@ -118,6 +118,20 @@ select.input-cell {
   border-radius: 8px;
   margin-bottom: 12px;
 }
+.backup-reminder {
+  background: #fff;
+  border: 1px solid #e2e5ea;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.backup-reminder.warn {
+  background: #fff8e8;
+  border-color: #e8c77a;
+}
+.help-modal li {
+  margin-bottom: 6px;
+}
 .tabs {
   display: flex;
   gap: 4px;

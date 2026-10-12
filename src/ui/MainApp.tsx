@@ -15,6 +15,8 @@ import { CaseInfoTab } from './tabs/CaseInfoTab';
 import { MaterialMasterTab } from './tabs/MaterialMasterTab';
 import { RateMasterTab } from './tabs/RateMasterTab';
 import { ParamsTab } from './tabs/ParamsTab';
+import { HelpModal } from './HelpModal';
+import { backupReminderStatus, readLastBackupAt, recordBackup } from './backupReminder';
 
 type TabKey = 'overview' | 'detail' | 'print' | 'check' | 'info' | 'material' | 'rate' | 'params';
 
@@ -37,12 +39,27 @@ export function MainApp() {
   const [saved, setSaved] = useState(false);
   const [report, setReport] = useState<ChangeReport | null>(null);
   const [exiting, setExiting] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [lastBackupAt, setLastBackupAt] = useState(() => current ? readLastBackupAt(current.id) : null);
+  const [backupMessage, setBackupMessage] = useState('');
 
   if (!current) return null;
 
-  function handleExport() {
+  const backupStatus = backupReminderStatus(lastBackupAt);
+
+  async function handleExport() {
     if (!current) return;
-    downloadText(suggestBackupFilename(current), exportCaseToJson(current, master?.workItems ?? []));
+    const completed = await downloadText(
+      suggestBackupFilename(current),
+      exportCaseToJson(current, master?.workItems ?? []),
+    );
+    if (completed) {
+      const at = recordBackup(current.id);
+      setLastBackupAt(at);
+      setBackupMessage('完整備份已匯出，請妥善保存檔案。');
+    } else {
+      setBackupMessage('備份未完成，請允許下載後重試。');
+    }
   }
 
   async function handleSave() {
@@ -82,9 +99,16 @@ export function MainApp() {
           {saved ? '已儲存 ✓' : '儲存'}
         </button>
         <button onClick={handleExport}>匯出完整備份</button>
+        <button onClick={() => setHelpOpen(true)}>使用說明</button>
         <button className="danger" onClick={() => setExiting(true)}>
           退出{dirty ? ' ●' : ''}
         </button>
+      </div>
+
+      <div className={`backup-reminder ${backupStatus.overdue ? 'warn' : 'ok'}`}>
+        <strong>{backupStatus.label}</strong>
+        {backupStatus.overdue && <span> — 建議現在匯出完整備份。</span>}
+        {backupMessage && <span> {backupMessage}</span>}
       </div>
 
       <div className="tabs">
@@ -109,6 +133,7 @@ export function MainApp() {
       {tab === 'params' && <ParamsTab />}
 
       {report && <ChangeReportModal report={report} onClose={() => setReport(null)} />}
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
 
       {exiting && (
         <div className="modal-overlay" onClick={() => setExiting(false)}>

@@ -3,12 +3,15 @@ import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { analyzeCustomItemImport, importBackupFromJson } from '../data/backup';
 import { pickTextFile } from './download';
+import { HelpModal } from './HelpModal';
+import { backupReminderStatus, clearBackupRecord, readLastBackupAt } from './backupReminder';
 
 export function CaseGate() {
   const { master, caseList, openCase, createCase, importBackup, deleteCase } = useAppStore();
   const [id, setId] = useState('');
   const [name, setName] = useState('');
   const [err, setErr] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   async function handleCreate() {
     setErr(null);
@@ -47,7 +50,10 @@ export function CaseGate() {
   return (
     <div className="gate">
       <h1>機電工程預算編制系統</h1>
-      <p className="muted">選擇既有案件，或建立新案件。</p>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <p className="muted">選擇既有案件，或建立新案件。</p>
+        <button onClick={() => setHelpOpen(true)}>使用說明</button>
+      </div>
 
       <div className="card">
         <h2>既有案件</h2>
@@ -61,29 +67,34 @@ export function CaseGate() {
                   <th className="l">名稱</th>
                   <th className="l">業主</th>
                   <th>版本</th>
+                  <th>本機備份</th>
                   <th>更新時間</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {caseList.map((c) => (
-                  <tr key={c.id}>
-                    <td className="l mono">{c.id}</td>
-                    <td className="l">
-                      <span className="link" onClick={() => openCase(c.id)}>
-                        {c.name}
-                      </span>
-                    </td>
-                    <td className="l">{c.owner || '—'}</td>
-                    <td className="mono">v{c.version}</td>
-                    <td className="mono">{c.updated.slice(0, 16).replace('T', ' ')}</td>
-                    <td>
-                      <button className="danger" onClick={() => confirmDelete(c.id, c.name, deleteCase)}>
-                        刪除
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {caseList.map((c) => {
+                  const backup = backupReminderStatus(readLastBackupAt(c.id));
+                  return (
+                    <tr key={c.id}>
+                      <td className="l mono">{c.id}</td>
+                      <td className="l">
+                        <span className="link" onClick={() => openCase(c.id)}>
+                          {c.name}
+                        </span>
+                      </td>
+                      <td className="l">{c.owner || '—'}</td>
+                      <td className="mono">v{c.version}</td>
+                      <td className={backup.overdue ? 'warn' : 'ok'}>{backup.label}</td>
+                      <td className="mono">{c.updated.slice(0, 16).replace('T', ' ')}</td>
+                      <td>
+                        <button className="danger" onClick={() => confirmDelete(c.id, c.name, deleteCase)}>
+                          刪除
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -102,10 +113,17 @@ export function CaseGate() {
         </div>
         {err && <p style={{ color: 'crimson', marginBottom: 0 }}>{err}</p>}
       </div>
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }
 
 function confirmDelete(id: string, name: string, del: (id: string) => Promise<void>) {
-  if (window.confirm(`確定刪除案件「${name}」？此動作無法復原。`)) void del(id);
+  const status = backupReminderStatus(readLastBackupAt(id));
+  const warning = status.lastBackupAt
+    ? `本機紀錄：${status.label}。`
+    : '本機沒有此案件的完整備份紀錄。';
+  if (window.confirm(`${warning}\n\n確定刪除案件「${name}」？此動作無法復原。`)) {
+    void del(id).then(() => clearBackupRecord(id));
+  }
 }

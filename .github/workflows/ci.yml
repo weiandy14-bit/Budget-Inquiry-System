@@ -27,6 +27,9 @@ jobs:
       - name: Type-check & build
         run: npm run build
 
+      - name: Verify release artifact
+        run: node scripts/build-artifact.mjs && npm run artifact:check
+
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 

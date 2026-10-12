@@ -35,26 +35,28 @@ export async function downloadText(
   filename: string,
   text: string,
   mime = 'application/json',
-): Promise<void> {
+): Promise<boolean> {
   const dl = await getDownloadsNs();
   if (dl) {
     try {
       await dl.save({ filename, data: text });
+      return true;
     } catch (e) {
       const code = (e as { code?: string })?.code;
       if (code === 'extension_not_enabled' || code === 'rejected_extension') {
         const alt = filename.replace(/\.[^.]+$/, '') + '.txt';
         try {
           await dl.save({ filename: alt, data: text });
+          return true;
         } catch {
-          /* 使用者取消或不可用：靜默 */
+          return false;
         }
       }
-      /* declined / rate_limited / 其他：靜默（使用者取消） */
+      return false;
     }
-    return;
   }
   anchorDownload(filename, text, mime);
+  return true;
 }
 
 export function pickTextFile(accept = '.json'): Promise<string | null> {
