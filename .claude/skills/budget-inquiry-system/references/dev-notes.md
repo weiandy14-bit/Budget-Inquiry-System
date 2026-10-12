@@ -53,4 +53,4 @@ IndexedDB 在 Artifact 頁面可用；若被沙箱擋，考慮加「IndexedDB �
 - Phase 3.1 已建立版本／變更紀錄規則與可重現 Release artifact；`npm run release:verify` 會執行完整檢查、E2E、兩次建置雜湊比對及單檔驗證。
 - Phase 3.2 已用正式 Chrome／Edge 通道驗證自包含單檔、離線修改／保存／重新載入及 IndexedDB 跨瀏覽器重啟保存；執行 `npm run release:browsers` 可重現，證據見 `docs/BROWSER_RELEASE_VERIFICATION.md`。
 - Phase 3.3 已加入應用程式內使用說明、每案最後備份時間／7 天提醒、刪除前備份狀態及可測試的錯誤復原說明；詳細操作見 `docs/USER_GUIDE.md`。
-- Phase 3.4 已決定採限定內部使用的自包含單檔，不建立公開網站或公開下載；固定位置更新、存取與回退規則見 `docs/DEPLOYMENT_DECISION.md`。Phase 3 開發與驗收完成，待分支推送、PR／CI、合併後依流程建立正式 `v0.1.0`。
+- Phase 3.4 已決定採限定內部使用的自包含單檔，不建立公開網站或公開下載；固定位置更新、存取與回退規則見 `docs/DEPLOYMENT_DECISION.md`。Phase 3 已完成並納入內部正式版 `v0.1.0`。
