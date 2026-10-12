@@ -13,9 +13,9 @@
 | 項目 | 大小 |
 |---|---:|
 | `src/seed/seed_data.json` | 2,190,538 bytes（2,139.20 KiB） |
-| 正式 JS | 1,728,836 bytes（1,688.32 KiB） |
-| 正式 JS gzip | 186.50 kB |
-| 自包含 `budget-system-app.html` | 1,732,880 bytes（1,692.27 KiB） |
+| 正式 JS | 1,732,602 bytes（1,692.00 KiB） |
+| 正式 JS gzip | 187.90 kB |
+| 自包含 `budget-system-app.html` | 1,736,853 bytes（1,696.15 KiB） |
 
 種子主檔含 3,639 筆工項，是 bundle 的主要來源；應用程式碼不是主要體積來源。Vite 對大型 JSON 採 `JSON.parse` 載入，未壓縮體積較舊版輸出大，但 gzip 後仍約 184 kB。
 

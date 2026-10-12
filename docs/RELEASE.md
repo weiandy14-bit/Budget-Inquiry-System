@@ -24,8 +24,8 @@ npm audit
 
 `release:verify` 會完成：
 
-1. 134 項單元測試及 TypeScript strict 檢查。
-2. 12 項 Chromium E2E。
+1. 138 項單元測試及 TypeScript strict 檢查。
+2. 13 項 Chromium E2E。
 3. 連續建置兩次 `dist/budget-system-app.html`，要求 SHA-256 完全相同。
 4. 驗證單檔沒有外部 script／stylesheet、保持 Artifact body-only 格式。
 5. 驗證版本與 `dist/release-manifest.json` 一致，且單檔不超過 1,800 KiB。

@@ -33,7 +33,13 @@ export function App() {
       <div className="app-shell">
         <h2>無法開啟本機資料</h2>
         <p style={{ color: 'crimson' }}>錯誤：{error}</p>
-        <p>系統尚未刪除任何資料。請先重試；若問題持續，請確認已保留 JSON 備份後再重建本機資料庫。</p>
+        <p>系統尚未刪除任何資料，請依序處理：</p>
+        <ol>
+          <li>先按「重試」，不要清除瀏覽器資料。</li>
+          <li>若其他分頁或舊版本仍可開啟，先逐案匯出完整 JSON 備份。</li>
+          <li>關閉其他仍開啟本系統的舊分頁，再回來重試。</li>
+          <li>只有已有備份或確定放棄資料時，才重建本機資料庫。</li>
+        </ol>
         <div className="row">
           <button className="primary" onClick={retry}>重試</button>
           <button className="danger" onClick={rebuildLocalDatabase}>重建本機資料庫（清除資料）</button>

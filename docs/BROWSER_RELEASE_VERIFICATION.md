@@ -3,7 +3,7 @@
 驗收日期：2026-10-12（Asia/Taipei）  
 作業系統：Windows x64  
 發布產物：`dist/budget-system-app.html`  
-SHA-256：`58ae60f6bd9cd2b169a1a2b63470da05481cc02a72dd3ed5cd6ef8d5569dda31`
+SHA-256：`5a722e0a58c200ad6b101867751a3f8a5cdae1bcd4998dd17b18476e93697398`
 
 ## 驗收方法
 
@@ -20,8 +20,8 @@ SHA-256：`58ae60f6bd9cd2b169a1a2b63470da05481cc02a72dd3ed5cd6ef8d5569dda31`
 
 | 瀏覽器 | 版本 | 冷啟動 | 離線重新載入 | 關閉後重啟 | 最大 JS heap | 結果 |
 |---|---:|---:|---:|---:|---:|---|
-| Google Chrome | 155.0.0.0 | 609 ms | 161 ms | 642 ms | 17,253,616 bytes | 通過 |
-| Microsoft Edge | 155.0.0.0 | 616 ms | 208 ms | 711 ms | 17,331,268 bytes | 通過 |
+| Google Chrome | 155.0.0.0 | 546 ms | 132 ms | 562 ms | 17,389,292 bytes | 通過 |
+| Microsoft Edge | 155.0.0.0 | 638 ms | 201 ms | 704 ms | 17,270,624 bytes | 通過 |
 
 以上數字是單次發布驗收紀錄，只用來發現明顯退化，不作硬性效能門檻。正式發布時應重新執行，並保存
 `dist/browser-verification.json`；瀏覽器版本、電腦負載與硬體不同都可能使時間和記憶體數字變動。

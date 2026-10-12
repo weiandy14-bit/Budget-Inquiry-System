@@ -38,7 +38,7 @@
 
 - [x] 建立可重現的 Release artifact；兩次建置雜湊、結構、版本及大小由 `npm run release:verify` 驗證。
 - [x] 驗證 Chrome、Edge、離線操作與資料保留，見 `BROWSER_RELEASE_VERIFICATION.md`。
-- [ ] 補齊使用說明、備份提醒及錯誤處理。
+- [x] 補齊使用說明、每案最後備份時間／7 天提醒、刪除前提示及錯誤復原流程，見 `USER_GUIDE.md`。
 - [ ] 決定正式部署方式與存取範圍。
 
 ## Phase 4：功能擴充
@@ -60,12 +60,12 @@
 執行環境：Node.js 22.22.3、npm 10.9.8。
 
 ```text
-npm test          14 files / 134 tests passed
+npm test          15 files / 138 tests passed
 npm run typecheck passed
 npm run build     passed
-npm run test:e2e  12 tests passed
+npm run test:e2e  13 tests passed
 npm audit         0 vulnerabilities
 ```
 
-正式 JS 為 1,728,836 bytes（gzip 186.50 kB），自包含 artifact 為 1,732,880 bytes；主要來源是 2,190,538 bytes 的種子主檔。現階段接受單檔取捨並以 1,800 KiB 監控成長。
+正式 JS 為 1,732,602 bytes（gzip 187.90 kB），自包含 artifact 為 1,736,853 bytes；主要來源是 2,190,538 bytes 的種子主檔。現階段接受單檔取捨並以 1,800 KiB 監控成長。
 
