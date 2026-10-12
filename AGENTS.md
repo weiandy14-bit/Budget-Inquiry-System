@@ -109,7 +109,8 @@ src/
 - Phase 1 技術盤點見 `docs/TECHNICAL_AUDIT.md`；相依安全報告已清為 0。
 - Bundle 決策見 `docs/BUNDLE_DECISION.md`；因自包含單檔需求暫不 code-split，以 1,800 kB 為成長上限。
 - Phase 2 已完成：包含 v2 完整備份、嚴格匯入驗證、IndexedDB 升級／復原、里程碑紀錄、統一整元結算與內部黃金測試。因沒有業主正式預算書，黃金資料僅供回歸，不代表外部驗收。
-- Phase 3.1 已建立 `CHANGELOG.md`、正式發布流程與可重現單檔驗證；下一步為 Chrome／Edge、離線操作及資料保留驗收。
+- Phase 3.1 已建立 `CHANGELOG.md`、正式發布流程與可重現單檔驗證。
+- Phase 3.2 已完成 Chrome／Edge、離線操作及 IndexedDB 重啟保存驗收；下一步為使用說明、備份提醒及錯誤處理。
 - 功能方向：其他大系統（電力／弱電／給排水／空調）目前僅空結構占位，待補子系統與工率資料。
 
 ---

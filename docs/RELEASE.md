@@ -18,6 +18,7 @@ Phase 3 決策；在該決策完成前，不建立公開 Release 或正式版本
 ```bash
 npm ci
 npm run release:verify
+npm run release:browsers
 npm audit
 ```
 
@@ -29,10 +30,15 @@ npm audit
 4. 驗證單檔沒有外部 script／stylesheet、保持 Artifact body-only 格式。
 5. 驗證版本與 `dist/release-manifest.json` 一致，且單檔不超過 1,800 KiB。
 
-驗證通過後保存以下兩個檔案；`dist/` 本身仍不提交 Git：
+`release:browsers` 會使用電腦上已安裝的正式 Google Chrome 與 Microsoft Edge，直接開啟自包含單檔，
+在斷網狀態修改並保存案件，再關閉、重啟相同瀏覽器資料目錄，確認 IndexedDB 資料仍存在。結果寫入
+`dist/browser-verification.json`，作為發布證據但不提交 Git。
+
+驗證通過後保存以下三個檔案；`dist/` 本身仍不提交 Git：
 
 - `dist/budget-system-app.html`
 - `dist/release-manifest.json`
+- `dist/browser-verification.json`
 
 ## 人工發布檢查
 

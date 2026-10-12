@@ -37,7 +37,7 @@
 ## Phase 3：正式單機版發布
 
 - [x] 建立可重現的 Release artifact；兩次建置雜湊、結構、版本及大小由 `npm run release:verify` 驗證。
-- [ ] 驗證 Chrome、Edge、離線操作與資料保留。
+- [x] 驗證 Chrome、Edge、離線操作與資料保留，見 `BROWSER_RELEASE_VERIFICATION.md`。
 - [ ] 補齊使用說明、備份提醒及錯誤處理。
 - [ ] 決定正式部署方式與存取範圍。
 

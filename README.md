@@ -29,6 +29,7 @@ npm test           # 執行單元測試（含火警範例案驗收）
 npm run build      # 產出 dist/ 靜態檔
 npm run preview    # 預覽 build 結果
 npm run release:verify # 正式發布候選：完整測試 + 兩次建置雜湊比對
+npm run release:browsers # 正式 Chrome／Edge：離線操作 + IndexedDB 重啟保存
 
 # 端對端測試（瀏覽器流程）
 npx playwright install chromium   # 首次需下載瀏覽器
