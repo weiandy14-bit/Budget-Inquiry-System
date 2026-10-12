@@ -41,8 +41,9 @@ npm run test:e2e                  # 自動起 dev server 並跑 e2e/app.spec.ts
 `npm run build` 後的 `dist/` 為純靜態檔（vite base 設為相對路徑），可用任何本機 server
 開啟；打包已為單機部署最佳化。
 
-正式發布的版本命名、可重現產物、SHA-256 清單與回退流程見 `docs/RELEASE.md`；版本變更記錄見
-`CHANGELOG.md`。實際操作、備份、搬移及錯誤復原步驟見 `docs/USER_GUIDE.md`。
+正式發布的版本命名、可重現產物、SHA-256 清單與回退流程見 `docs/RELEASE.md`；內部限定部署與
+存取決策見 `docs/DEPLOYMENT_DECISION.md`；版本變更記錄見 `CHANGELOG.md`。實際操作、備份、搬移及
+錯誤復原步驟見 `docs/USER_GUIDE.md`。
 
 ---
 

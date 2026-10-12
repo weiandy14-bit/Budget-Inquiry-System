@@ -1,7 +1,7 @@
-# 線上版維護 / 更新 / 檢驗指南
+# 單機版維護 / 更新 / 檢驗指南
 
 這套系統是單機版（資料存瀏覽器 IndexedDB），主檔資料在 `src/seed/seed_data.json`。
-以下是「改了東西之後，如何安全地驗證並更新線上版」的固定流程。
+以下是「改了東西之後，如何安全地驗證並更新內部正式版」的固定流程。
 
 ## 一、改完先「檢驗」
 
@@ -25,7 +25,7 @@ npm run check
 npm run test:e2e     # 首次本機需 npx playwright install chromium
 ```
 
-## 三、產出線上版單檔
+## 三、產出內部正式版單檔
 
 ```bash
 npm run artifact
@@ -37,10 +37,11 @@ npm run artifact
 dist/budget-system-app.html
 ```
 
-把這個檔發佈到 Artifact（線上展示）即可；它不依賴任何外部檔案。
+這個檔不依賴任何外部檔案。正式版應連同驗證證據保存到具存取控制的內部位置，不建立公開網站或公開下載。
 
 正式發布候選請改跑 `npm run release:verify`，它會連續建置兩次並核對 SHA-256、單檔結構、版本、
-1,800 KiB 大小上限與 `dist/release-manifest.json`。完整步驟見 `RELEASE.md`。
+1,800 KiB 大小上限與 `dist/release-manifest.json`。完整步驟見 `RELEASE.md`；正式版只透過具存取控制的
+內部位置提供，更新與回退規則見 `DEPLOYMENT_DECISION.md`。
 
 ## 四、常見維護點
 
